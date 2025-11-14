@@ -1,6 +1,6 @@
 <?php
 
-// Reuse centralized Database singleton
+// Base de datos y tabla transfer_reservas
 require_once __DIR__ . '/../app/core/Database.php';
 try {
     $pdo = Database::getInstance()->getConnection();
@@ -72,7 +72,6 @@ $existing = array_map('strtolower', $existing);
 
 foreach ($expectedCols as $col => $definition) {
     if (!in_array(strtolower($col), $existing)) {
-        // Add missing column
         $sql = "ALTER TABLE transfer_reservas ADD COLUMN {$col} {$definition}";
         try {
             $pdo->exec($sql);

@@ -11,10 +11,16 @@ class TransferReserva {
      * Mira todas las reservas 
      * @return array
      */
-    public function getAll() {
+    public function getAll($filterByEmail = null) {
         try {
-            $stmt = $this->pdo->query('SELECT * FROM transfer_reservas');
-            return $stmt->fetchAll();
+            if ($filterByEmail) {
+                $stmt = $this->pdo->prepare('SELECT * FROM transfer_reservas WHERE email_cliente = :email');
+                $stmt->execute([':email' => $filterByEmail]);
+                return $stmt->fetchAll();
+            } else {
+                $stmt = $this->pdo->query('SELECT * FROM transfer_reservas');
+                return $stmt->fetchAll();
+            }
         } catch (PDOException $e) {
             throw new RuntimeException('Error fetching transfer reservas: ' . $e->getMessage());
         }

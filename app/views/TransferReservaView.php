@@ -7,7 +7,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transfer Reservas - Calendario</title>
+    <title>Calendario</title>
     <style>
         * {
             margin: 0;
@@ -246,6 +246,21 @@
         <h1>📅 Calendario de Reservas</h1>
         
         <?php
+        require_once __DIR__ . '/../models/Auth.php';
+        if (Auth::isLoggedIn()) {
+            $user = Auth::getCurrentUser();
+            echo '<div class="stats" style="background: linear-gradient(135deg, #52c41a 0%, #389e0d 100%); margin-bottom: 20px;">';
+            echo 'Sesión activa: <strong>' . htmlspecialchars($user['user_name']) . '</strong> (' . $user['user_type'] . ') ';
+            echo '<a href="?action=logout" style="color: white; text-decoration: underline;">Cerrar sesión</a>';
+            echo '</div>';
+        } else {
+            echo '<div class="stats" style="background: linear-gradient(135deg, #1890ff 0%, #0050b3 100%); margin-bottom: 20px; text-align: center;">';
+            echo '<a href="?action=auth" style="color: white; text-decoration: none; font-weight: 600;">🔐 Iniciar sesión o Registrarse</a>';
+            echo '</div>';
+        }
+        ?>
+        
+        <?php
         if (!isset($reservas)) {
             echo '<div class="error"><strong>No data provided.</strong> The controller must supply <code>$reservas</code>.</div>';
         } else {
@@ -255,14 +270,11 @@
                 echo '<div class="no-data">No se han encontrado reservas.</div>';
             } else {
                 echo '<div class="stats">Total de reservas: <strong>' . htmlspecialchars($total) . '</strong></div>';
-
-                // Get current month or from URL parameter
                 $currentDate = new DateTime();
                 if (isset($_GET['month']) && isset($_GET['year'])) {
                     $currentDate = new DateTime($_GET['year'] . '-' . str_pad($_GET['month'], 2, '0', STR_PAD_LEFT) . '-01');
                 }
-
-                // Group reservations by fecha_entrada
+                //Organizar las reservas por fecha_entrada
                 $reservasByDate = [];
                 foreach ($reservas as $reserva) {
                     $fecha = $reserva['fecha_entrada'] ?? null;
@@ -274,7 +286,7 @@
                     }
                 }
 
-                // Generate calendar
+                //Crea el calendario
                 $year = (int)$currentDate->format('Y');
                 $month = (int)$currentDate->format('m');
                 $firstDay = new DateTime("$year-" . str_pad($month, 2, '0', STR_PAD_LEFT) . "-01");
@@ -304,13 +316,10 @@
                 }
                 echo '</tr></thead>';
                 echo '<tbody><tr>';
-
-                // Get the starting day of the month (0 = Monday)
                 $startDay = $firstDay->format('N') - 1;
                 $day = 1;
                 $cellsInMonth = (int)$lastDay->format('d');
 
-                // Fill empty cells before month starts
                 $prevLastDay = clone $firstDay;
                 $prevLastDay->modify('-1 day');
                 $prevCellStart = (int)$prevLastDay->format('d') - $startDay + 1;
@@ -320,7 +329,6 @@
                     echo '<td class="other-month"><div class="day-number other-month">' . $prevDay . '</div></td>';
                 }
 
-                // Fill days of current month
                 $cellsGenerated = $startDay;
                 for ($day = 1; $day <= $cellsInMonth; $day++) {
                     $dateStr = $year . '-' . str_pad($month, 2, '0', STR_PAD_LEFT) . '-' . str_pad($day, 2, '0', STR_PAD_LEFT);
@@ -349,7 +357,6 @@
                     }
                 }
 
-                // Fill remaining cells with next month's days
                 $remainingCells = 7 - ($cellsGenerated % 7);
                 if ($remainingCells !== 7) {
                     for ($day = 1; $day <= $remainingCells; $day++) {
@@ -371,7 +378,7 @@
                 <button class="close-btn" onclick="closeModal()">&times;</button>
             </div>
             <div class="modal-body" id="modalBody">
-                <!-- Content loaded dynamically -->
+                <!-- Detalles de la reserva se ponen aquí -->
             </div>
         </div>
     </div>

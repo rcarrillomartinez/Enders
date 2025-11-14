@@ -1,6 +1,6 @@
 <?php
-// Centralized database configuration
-// Edit these values to match your local environment
+// Base de datos centralizada
+// Edita estos valores para que coincidan con tu entorno local
 
 if (!defined('DB_HOST')) define('DB_HOST', '127.0.0.1');
 if (!defined('DB_PORT')) define('DB_PORT', 3306);

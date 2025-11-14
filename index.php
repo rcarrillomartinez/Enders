@@ -1,26 +1,54 @@
 <?php
+session_start();
 
 require_once __DIR__ . '/app/core/Database.php';
-
+require_once __DIR__ . '/app/core/Controller.php';
+require_once __DIR__ . '/app/models/Auth.php';
 
 try {
     $pdo = Database::getInstance()->getConnection();
     
-    require_once __DIR__ . '/app/controllers/TransferReservaController.php';
-    
-    $controller = new TransferReservaController($pdo);
-    
     $action = isset($_GET['action']) ? $_GET['action'] : 'index';
-    $id = isset($_GET['id']) ? (int)$_GET['id'] : null;
     
-    if ($action === 'show' && $id) {
-        $controller->show($id);
-    } elseif ($action === 'create') {
-        $controller->create();
-    } elseif ($action === 'store' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-        $controller->store();
+    if (in_array($action, ['auth', 'login', 'register', 'signup', 'logout', 'dashboard'])) {
+        require_once __DIR__ . '/app/controllers/AuthController.php';
+        $controller = new AuthController($pdo);
+        
+        switch ($action) {
+            case 'auth':
+                $controller->index();
+                break;
+            case 'login':
+                $controller->login();
+                break;
+            case 'signup':
+                $controller->signup();
+                break;
+            case 'register':
+                $controller->register();
+                break;
+            case 'logout':
+                $controller->logout();
+                break;
+            case 'dashboard':
+                $controller->dashboard();
+                break;
+        }
     } else {
-        $controller->index();
+        require_once __DIR__ . '/app/controllers/TransferReservaController.php';
+        $controller = new TransferReservaController($pdo);
+        
+        $id = isset($_GET['id']) ? (int)$_GET['id'] : null;
+        
+        if ($action === 'show' && $id) {
+            $controller->show($id);
+        } elseif ($action === 'create') {
+            $controller->create();
+        } elseif ($action === 'store' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+            $controller->store();
+        } else {
+            $controller->index();
+        }
     }
     
 } catch (Exception $e) {
@@ -29,3 +57,4 @@ try {
     echo '<p>' . htmlspecialchars($e->getMessage()) . '</p>';
     echo '</div>';
 }
+?>
