@@ -1,27 +1,22 @@
 <?php
-
+// This view expects the controller to provide the variable:
+// - $reserva : associative array for a single reservation
 ?>
-        <?php
-        if (isset($reserva) && !empty($reserva)) {
-            echo '<div class="detail-group">';
-            foreach ($reserva as $key => $value) {
-                echo '<div class="detail-row">';
-                echo '<span class="detail-label">' . htmlspecialchars(ucfirst(str_replace('_', ' ', $key))) . ':</span>';
-                echo '<span class="detail-value">' . htmlspecialchars($value ?? 'N/A') . '</span>';
-                echo '</div>';
-            }
-            echo '</div>';
-            echo '<a href="?action=list" class="btn">Back to List</a>';
-        } else {
-            echo '<div class="error"><strong>Reserva no encontrada.</strong></div>';
-        }
-        ?>
-<html>
+
+<!DOCTYPE html>
+<html lang="es">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Transfer Reserva Detail</title>
-    <meta charset="utf-8" />
     <style>
         body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
             margin: 0 auto;
             background-color: white;
             padding: 20px;
@@ -52,6 +47,7 @@
         .detail-value {
             flex: 1;
             color: #333;
+            word-break: break-word;
         }
         .btn {
             display: inline-block;
@@ -88,9 +84,9 @@
                 echo '</div>';
             }
             echo '</div>';
-            echo '<a href="?action=list" class="btn">Back to List</a>';
+            echo '<a href="index.php" class="btn">Back to List</a>';
         } else {
-            echo '<div class="error"><strong>Reservation not found.</strong></div>';
+            echo '<div class="error"><strong>Reserva no encontrada.</strong></div>';
         }
         ?>
     </div>

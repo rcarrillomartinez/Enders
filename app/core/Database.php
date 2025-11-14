@@ -18,7 +18,7 @@ class Database {
         try {
             $this->pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
         } catch (PDOException $e) {
-            // Rethrow to let caller handle
+
             throw $e;
         }
     }
@@ -37,6 +37,5 @@ class Database {
     }
 
     private function __clone() {}
-    // __wakeup must be public in PHP; keep it empty to prevent unserialization usage
     public function __wakeup() {}
 }
