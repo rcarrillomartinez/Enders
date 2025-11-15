@@ -1,0 +1,45 @@
+# =========================================================
+# .gitignore UNIFICADO para PHP (Backend) y React (Frontend)
+# =========================================================
+
+# ------------------------------------
+# 1. Backend (PHP) Exclusiones
+# ------------------------------------
+
+# Variables de Entorno (Contienen credenciales sensibles de DB)
+/backend/.env
+/backend/config/config.local.php 
+
+# Logs y archivos de runtime
+*.log
+*.sql 
+/tmp/
+
+# Dependencias de Composer (si se usa)
+/backend/vendor/
+
+# ------------------------------------
+# 2. Frontend (React) Exclusiones
+# ------------------------------------
+
+# Dependencias de Node (archivos muy grandes)
+/frontend/node_modules
+
+# Archivos de compilación y salida (Generados por npm run build)
+/frontend/build
+/frontend/dist
+/frontend/out
+
+# Archivos de configuración locales de React
+/frontend/.env.local
+/frontend/.env.development.local
+/frontend/.env.test.local
+/frontend/.env.production.local
+
+# ------------------------------------
+# 3. Exclusiones Globales
+# ------------------------------------
+
+# Archivos de caché del SO
+.DS_Store
+Thumbs.db
