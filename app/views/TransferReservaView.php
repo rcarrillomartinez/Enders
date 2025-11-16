@@ -50,6 +50,20 @@
             margin-bottom: 30px;
             gap: 20px;
         }
+        .view-switcher {
+            display: flex;
+            gap: 5px;
+        }
+        .view-switcher select {
+            background-color: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+        }
         .calendar-nav button {
             background-color: #667eea;
             color: white;
@@ -271,10 +285,15 @@
             } else {
                 echo '<div class="stats">Total de reservas: <strong>' . htmlspecialchars($total) . '</strong></div>';
                 $currentDate = new DateTime();
-                if (isset($_GET['month']) && isset($_GET['year'])) {
-                    $currentDate = new DateTime($_GET['year'] . '-' . str_pad($_GET['month'], 2, '0', STR_PAD_LEFT) . '-01');
+                if (isset($_GET['date'])) {
+                    $currentDate = new DateTime($_GET['date']);
                 }
-                //Organizar las reservas por fecha_entrada
+
+                $view = $_GET['view'] ?? 'month';
+                $today = new DateTime();
+                $todayStr = $today->format('Y-m-d');
+
+                // Organizar las reservas por fecha_entrada
                 $reservasByDate = [];
                 foreach ($reservas as $reserva) {
                     $fecha = $reserva['fecha_entrada'] ?? null;
@@ -286,86 +305,163 @@
                     }
                 }
 
-                //Crea el calendario
-                $year = (int)$currentDate->format('Y');
-                $month = (int)$currentDate->format('m');
-                $firstDay = new DateTime("$year-" . str_pad($month, 2, '0', STR_PAD_LEFT) . "-01");
-                $lastDay = clone $firstDay;
-                $lastDay->modify('last day of this month');
-                
-                $prevMonth = clone $firstDay;
-                $prevMonth->modify('-1 month');
-                $nextMonth = clone $firstDay;
-                $nextMonth->modify('+1 month');
+                $months_es = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+                $days_es = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+
+                $prevDate = clone $currentDate;
+                $nextDate = clone $currentDate;
+                $headerText = '';
+
+                if ($view === 'month') {
+                    $currentDate->modify('first day of this month');
+                    $prevDate->modify('first day of this month')->modify('-1 month');
+                    $nextDate->modify('first day of this month')->modify('+1 month');
+                    $headerText = $months_es[$currentDate->format('n') - 1] . ' de ' . $currentDate->format('Y');
+                } elseif ($view === 'week') {
+                    $currentDate->modify('monday this week');
+                    $prevDate->modify('monday this week')->modify('-1 week');
+                    $nextDate->modify('monday this week')->modify('+1 week');
+                    $endOfWeek = (clone $currentDate)->modify('+6 days');
+                    $headerText = 'Semana del ' . $currentDate->format('d/m/Y') . ' al ' . $endOfWeek->format('d/m/Y');
+                } else { // day view
+                    $prevDate->modify('-1 day');
+                    $nextDate->modify('+1 day');
+                    $headerText = $days_es[$currentDate->format('N') - 1] . ', ' . $currentDate->format('d') . ' de ' . $months_es[$currentDate->format('n') - 1] . ' de ' . $currentDate->format('Y');
+                }
 
                 echo '<div class="calendar-nav">';
-                echo '<button onclick="location.href=\'?action=index&month=' . $prevMonth->format('m') . '&year=' . $prevMonth->format('Y') . '\'">← Anterior</button>';
-                $months_es = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-                $monthName = $months_es[$firstDay->format('n') - 1];
-                $yearName = $firstDay->format('Y');
-                
-                echo '<div class="current-month">' . $monthName . ' de ' . $yearName . '</div>';
-                echo '<button onclick="location.href=\'?action=index&month=' . $nextMonth->format('m') . '&year=' . $nextMonth->format('Y') . '\'">Siguiente →</button>';
+                echo '<button onclick="location.href=\'?action=index&view=' . $view . '&date=' . $prevDate->format('Y-m-d') . '\'">← Anterior</button>';
+                echo '<div class="current-month">' . $headerText . '</div>';
+                echo '<div class="view-switcher">';
+                echo '<select id="view-selector" onchange="changeView(this)">';
+                echo '<option value="month"' . ($view === 'month' ? ' selected' : '') . '>Mes</option>';
+                echo '<option value="week"' . ($view === 'week' ? ' selected' : '') . '>Semana</option>';
+                echo '<option value="day"' . ($view === 'day' ? ' selected' : '') . '>Día</option>';
+                echo '</select>';
+                echo '</div>';
+                echo '<button onclick="location.href=\'?action=index&view=' . $view . '&date=' . $nextDate->format('Y-m-d') . '\'">Siguiente →</button>';
                 echo '</div>';
 
-                echo '<table class="calendar">';
-                echo '<thead><tr>';
-                $days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-                foreach ($days as $day) {
-                    echo '<th>' . $day . '</th>';
-                }
-                echo '</tr></thead>';
-                echo '<tbody><tr>';
-                $startDay = $firstDay->format('N') - 1;
-                $day = 1;
-                $cellsInMonth = (int)$lastDay->format('d');
-
-                $prevLastDay = clone $firstDay;
-                $prevLastDay->modify('-1 day');
-                $prevCellStart = (int)$prevLastDay->format('d') - $startDay + 1;
-
-                for ($i = 0; $i < $startDay; $i++) {
-                    $prevDay = $prevCellStart + $i;
-                    echo '<td class="other-month"><div class="day-number other-month">' . $prevDay . '</div></td>';
-                }
-
-                $cellsGenerated = $startDay;
-                for ($day = 1; $day <= $cellsInMonth; $day++) {
-                    $dateStr = $year . '-' . str_pad($month, 2, '0', STR_PAD_LEFT) . '-' . str_pad($day, 2, '0', STR_PAD_LEFT);
-                    $isToday = $dateStr === date('Y-m-d') ? 'today' : '';
+                // Render calendar based on view
+                if ($view === 'month') {
+                    // Crea el calendario mensual
+                    $firstDayOfMonth = (clone $currentDate)->modify('first day of this month');
+                    $lastDayOfMonth = (clone $currentDate)->modify('last day of this month');
                     
-                    echo '<td class="' . $isToday . '">';
-                    echo '<div class="day-number">' . $day . '</div>';
+                    echo '<table class="calendar">';
+                    echo '<thead><tr>';
+                    foreach ($days_es as $dayName) {
+                        echo '<th>' . $dayName . '</th>';
+                    }
+                    echo '</tr></thead>';
+                    echo '<tbody><tr>';
+                    
+                    $startDayOfWeek = $firstDayOfMonth->format('N') - 1;
+                    $daysInMonth = (int)$lastDayOfMonth->format('d');
 
+                    $prevMonthLastDay = (clone $firstDayOfMonth)->modify('-1 day');
+                    $prevMonthCellStart = (int)$prevMonthLastDay->format('d') - $startDayOfWeek + 1;
+
+                    for ($i = 0; $i < $startDayOfWeek; $i++) {
+                        echo '<td class="other-month"><div class="day-number other-month">' . ($prevMonthCellStart + $i) . '</div></td>';
+                    }
+
+                    $cellsGenerated = $startDayOfWeek;
+                    for ($day = 1; $day <= $daysInMonth; $day++) {
+                        $dateStr = $currentDate->format('Y-m') . '-' . str_pad($day, 2, '0', STR_PAD_LEFT);
+                        $isToday = $dateStr === $todayStr ? 'today' : '';
+                        
+                        echo '<td class="' . $isToday . '">';
+                        echo '<div class="day-number">' . $day . '</div>';
+
+                        if (isset($reservasByDate[$dateStr])) {
+                            echo '<ul class="reservations-list">';
+                            foreach ($reservasByDate[$dateStr] as $reserva) {
+                                $status = $reserva['estado'] ?? 'pendiente';
+                                $localizador = $reserva['localizador'] ?? 'N/A';
+                                echo '<li class="reservation-item ' . htmlspecialchars($status) . '" onclick="showReservation(event)" data-reserva=\'' . htmlspecialchars(json_encode($reserva)) . '\'>';
+                                echo htmlspecialchars($localizador);
+                                echo '</li>';
+                            }
+                            echo '</ul>';
+                        }
+                        echo '</td>';
+                        
+                        $cellsGenerated++;
+                        if ($cellsGenerated % 7 === 0 && $day < $daysInMonth) {
+                            echo '</tr><tr>';
+                        }
+                    }
+
+                    $remainingCells = 7 - ($cellsGenerated % 7);
+                    if ($remainingCells !== 7) {
+                        for ($day = 1; $day <= $remainingCells; $day++) {
+                            echo '<td class="other-month"><div class="day-number other-month">' . $day . '</div></td>';
+                        }
+                    }
+
+                    echo '</tr></tbody>';
+                    echo '</table>';
+
+                } elseif ($view === 'week') { //Vista de semana
+                    echo '<table class="calendar">';
+                    echo '<thead><tr>';
+                    $dayIterator = clone $currentDate;
+                    for ($i = 0; $i < 7; $i++) {
+                        echo '<th>' . $days_es[$dayIterator->format('N') - 1] . ' ' . $dayIterator->format('d/m') . '</th>';
+                        $dayIterator->modify('+1 day');
+                    }
+                    echo '</tr></thead>';
+                    echo '<tbody><tr>';
+                    $dayIterator = clone $currentDate;
+                    for ($i = 0; $i < 7; $i++) {
+                        $dateStr = $dayIterator->format('Y-m-d');
+                        $isToday = $dateStr === $todayStr ? 'today' : '';
+                        echo '<td class="' . $isToday . '">';
+                        echo '<div class="day-number">' . $dayIterator->format('j') . '</div>';
+                        if (isset($reservasByDate[$dateStr])) {
+                            echo '<ul class="reservations-list">';
+                            foreach ($reservasByDate[$dateStr] as $reserva) {
+                                $status = $reserva['estado'] ?? 'pendiente';
+                                $localizador = $reserva['localizador'] ?? 'N/A';
+                                echo '<li class="reservation-item ' . htmlspecialchars($status) . '" onclick="showReservation(event)" data-reserva=\'' . htmlspecialchars(json_encode($reserva)) . '\'>';
+                                echo htmlspecialchars($localizador);
+                                echo '</li>';
+                            }
+                            echo '</ul>';
+                        }
+                        echo '</td>';
+                        $dayIterator->modify('+1 day');
+                    }
+                    echo '</tr></tbody>';
+                    echo '</table>';
+
+                } else { // Vista de dia
+                    echo '<table class="calendar">';
+                    echo '<thead><tr><th>' . $headerText . '</th></tr></thead>';
+                    echo '<tbody><tr>';
+                    $dateStr = $currentDate->format('Y-m-d');
+                    $isToday = $dateStr === $todayStr ? 'today' : '';
+                    echo '<td class="' . $isToday . '" style="height: 60vh;">';
                     if (isset($reservasByDate[$dateStr])) {
                         echo '<ul class="reservations-list">';
                         foreach ($reservasByDate[$dateStr] as $reserva) {
                             $status = $reserva['estado'] ?? 'pendiente';
                             $localizador = $reserva['localizador'] ?? 'N/A';
+                            $hora = isset($reserva['hora_recogida']) ? (new DateTime($reserva['hora_recogida']))->format('H:i') : '';
                             echo '<li class="reservation-item ' . htmlspecialchars($status) . '" onclick="showReservation(event)" data-reserva=\'' . htmlspecialchars(json_encode($reserva)) . '\'>';
-                            echo htmlspecialchars($localizador);
+                            echo '<strong>' . htmlspecialchars($hora) . '</strong> - ' . htmlspecialchars($localizador);
                             echo '</li>';
                         }
                         echo '</ul>';
+                    } else {
+                        echo '<div class="no-data">No hay reservas para este día.</div>';
                     }
-
                     echo '</td>';
-                    
-                    $cellsGenerated++;
-                    if ($cellsGenerated % 7 === 0 && $day < $cellsInMonth) {
-                        echo '</tr><tr>';
-                    }
+                    echo '</tr></tbody>';
+                    echo '</table>';
                 }
 
-                $remainingCells = 7 - ($cellsGenerated % 7);
-                if ($remainingCells !== 7) {
-                    for ($day = 1; $day <= $remainingCells; $day++) {
-                        echo '<td class="other-month"><div class="day-number other-month">' . $day . '</div></td>';
-                    }
-                }
-
-                echo '</tr></tbody>';
-                echo '</table>';
             }
         }
         ?>
@@ -384,6 +480,12 @@
     </div>
 
     <script>
+        function changeView(selector) {
+            const newView = selector.value;
+            const currentDate = '<?php echo $currentDate->format('Y-m-d'); ?>';
+            location.href = `?action=index&view=${newView}&date=${currentDate}`;
+        }
+
         function showReservation(event) {
             const item = event.target.closest('.reservation-item');
             if (!item) return;
