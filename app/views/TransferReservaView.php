@@ -280,6 +280,16 @@
         } else {
             $total = $total ?? count($reservas);
 
+            // Filtrar reservas si el usuario es un viajero
+            if (Auth::isLoggedIn()) {
+                $currentUser = Auth::getCurrentUser();
+                if ($currentUser && $currentUser['user_type'] === 'viajero' && isset($currentUser['user_email'])) {
+                    $reservas = array_filter($reservas, function($reserva) use ($currentUser) {
+                        return isset($reserva['email_cliente']) && $reserva['email_cliente'] === $currentUser['user_email'];
+                    });
+                }
+            }
+
             if (empty($reservas)) {
                 echo '<div class="no-data">No se han encontrado reservas.</div>';
             } else {
@@ -323,7 +333,7 @@
                     $nextDate->modify('monday this week')->modify('+1 week');
                     $endOfWeek = (clone $currentDate)->modify('+6 days');
                     $headerText = 'Semana del ' . $currentDate->format('d/m/Y') . ' al ' . $endOfWeek->format('d/m/Y');
-                } else { // day view
+                } else {
                     $prevDate->modify('-1 day');
                     $nextDate->modify('+1 day');
                     $headerText = $days_es[$currentDate->format('N') - 1] . ', ' . $currentDate->format('d') . ' de ' . $months_es[$currentDate->format('n') - 1] . ' de ' . $currentDate->format('Y');
