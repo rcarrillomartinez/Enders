@@ -5,18 +5,18 @@ use PDO;
 
 // --- Configuración general ---
 define('APP_NAME', 'Reservas MVC');
-define('APP_URL', 'http://localhost'); // Cambiar según tu dominio
+define('APP_URL', 'http://localhost'); 
 define('APP_DEBUG', true);
 
 // --- Base de datos ---
 define('DB_HOST', 'localhost');
 define('DB_PORT', 3306);
 define('DB_NAME', 'uoc_transfers');
-define('DB_USER', 'roqueCM');
-define('DB_PASS', '8591RCM'); 
+define('DB_USER', 'root');
+define('DB_PASS', ''); 
 define('DB_CHARSET', 'utf8mb4');
 
-// --- Configuración de correo (opcional para notificaciones) ---
+// --- Configuración de correo 
 define('MAIL_FROM', 'no-reply@reservas.com');
 define('MAIL_FROM_NAME', 'Reservas MVC');
 
