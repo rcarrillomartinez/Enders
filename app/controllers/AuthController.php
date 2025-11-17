@@ -51,7 +51,7 @@ class AuthController extends Controller {
 
         // Si el login es exitoso, redirige al calendario
         if ($result && $result['success']) {
-            header('Location: ?action=index');
+            header('Location: ?action=dashboard');
             exit();
         }
 
@@ -121,7 +121,7 @@ class AuthController extends Controller {
                     $_POST['password'] ?? ''
                 );
                 if ($loginResult['success']) {
-                    header('Location: ?action=index');
+                    header('Location: ?action=dashboard');
                     exit();
                 }
             } elseif ($user_type === 'hotel') {

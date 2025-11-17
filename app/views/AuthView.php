@@ -239,9 +239,12 @@
                     <?php echo htmlspecialchars($result['message']); ?>
                 </div>
                 <?php if ($result['success']): ?>
-                    <p style="text-align: center; color: #156724; font-weight: 600;">
-                        Redirigiendo al calendario... <a href="?action=index">Ir al calendario</a>
+                    <p style="text-align: center; color: #155724; font-weight: 600;">
+                        Redirigiendo al panel de control...
                     </p>
+                    <script>
+                        setTimeout(() => { window.location.href = '?action=dashboard'; }, 1500);
+                    </script>
                 <?php endif; ?>
             <?php endif; ?>
 
