@@ -1,24 +1,22 @@
 <?php
+namespace app\core;
 
+/**
+ * Clase base para todos los controladores
+ */
 class Controller {
     protected $pdo;
 
-    public function __construct($pdo) {
-        $this->pdo = $pdo;
+    public function __construct() {
+        $this->pdo = Database::getInstance()->getConnection();
     }
 
-    protected function view($viewName, $data = []) {
-        extract($data);
-        $viewPath = __DIR__ . '/../views/' . $viewName . '.php';
+    public function view($view, $data = []) {
+        View::render($view, $data);
+    }
 
-        if (!file_exists($viewPath)) {
-            die("View file not found: {$viewPath}");
-        }
-
-        ob_start();
-        include $viewPath;
-        $content = ob_get_clean();
-        echo $content;
+    public function redirect($url) {
+        header("Location: $url");
+        exit();
     }
 }
-?>
