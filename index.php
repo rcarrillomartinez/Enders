@@ -1,60 +1,78 @@
 <?php
-session_start();
+// Arranque de la aplicación
 
-require_once __DIR__ . '/app/core/Database.php';
-require_once __DIR__ . '/app/core/Controller.php';
-require_once __DIR__ . '/app/models/Auth.php';
+// --- Mostrar errores en desarrollo ---
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
-try {
-    $pdo = Database::getInstance()->getConnection();
+// --- Carga automática de clases usando namespaces ---
+spl_autoload_register(function($class) {
+    $prefix = 'app\\';
+    $base_dir = __DIR__ . '/app/';
     
-    $action = isset($_GET['action']) ? $_GET['action'] : 'index';
-    
-    if (in_array($action, ['auth', 'login', 'register', 'signup', 'logout', 'dashboard'])) {
-        require_once __DIR__ . '/app/controllers/AuthController.php';
-        $controller = new AuthController($pdo);
-        
-        switch ($action) {
-            case 'auth':
-                $controller->index();
-                break;
-            case 'login':
-                $controller->login();
-                break;
-            case 'signup':
-                $controller->signup();
-                break;
-            case 'register':
-                $controller->register();
-                break;
-            case 'logout':
-                $controller->logout();
-                break;
-            case 'dashboard':
-                $controller->dashboard();
-                break;
-        }
-    } else {
-        require_once __DIR__ . '/app/controllers/TransferReservaController.php';
-        $controller = new TransferReservaController($pdo);
-        
-        $id = isset($_GET['id']) ? (int)$_GET['id'] : null;
-        
-        if ($action === 'show' && $id) {
-            $controller->show($id);
-        } elseif ($action === 'create') {
-            $controller->create();
-        } elseif ($action === 'store' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-            $controller->store();
-        } else {
-            $controller->index();
-        }
+    $len = strlen($prefix);
+    if (strncmp($prefix, $class, $len) !== 0) {
+        return;
     }
     
-} catch (Exception $e) {
-    echo '<div style="background-color: #f8d7da; color: #721c24; padding: 15px; margin: 20px; border-radius: 4px;">';
-    echo '<h2>Error</h2>';
-    echo '<p>' . htmlspecialchars($e->getMessage()) . '</p>';
-    echo '</div>';
+    $relative_class = substr($class, $len);
+    $file = $base_dir . str_replace('\\', '/', $relative_class) . '.php';
+    
+    if (file_exists($file)) {
+        require $file;
+    }
+});
+
+// --- Cargar configuración ---
+require_once __DIR__ . '/app/config/Config.php';
+
+// --- Iniciar sesión ---
+session_start();
+
+// --- Obtener la acción desde la URL ---
+$action = $_GET['action'] ?? 'dashboard';
+$pdo = \app\config\getPDO(); // Obtenemos PDO desde config
+
+// --- Mapear acciones a controladores ---
+$routes = [
+    'home' => ['\app\controllers\HomeController', 'index'],
+    'auth' => ['\app\controllers\AuthController', 'index'],
+    'login' => ['\app\controllers\AuthController', 'login'],
+    'signup' => ['\app\controllers\AuthController', 'signup'],
+    'register' => ['\app\controllers\AuthController', 'register'],
+    'logout' => ['\app\controllers\AuthController', 'logout'],
+    'dashboard' => ['\app\controllers\UserController', 'dashboard'],
+    'perfil' => ['\app\controllers\UserController', 'perfil'],
+    'updatePerfil' => ['\app\controllers\UserController', 'updatePerfil'],
+    'calendar' => ['\app\controllers\TransferReservaController', 'index'],
+    'showReserva' => ['\app\controllers\TransferReservaController', 'show'],
+    'createReserva' => ['\app\controllers\TransferReservaController', 'create'],
+    'storeReserva' => ['\app\controllers\TransferReservaController', 'store']
+];
+
+// --- Ejecutar la acción ---
+if (isset($routes[$action])) {
+    [$controllerClass, $method] = $routes[$action];
+    $controller = new $controllerClass($pdo);
+
+    // Pasar parámetros según la acción
+    switch ($action) {
+        case 'showReserva':
+            $id = $_GET['id'] ?? null;
+            if (!$id) {
+                die('ID de reserva no proporcionado');
+            }
+            $controller->$method($id);
+            break;
+
+        default:
+            $controller->$method();
+            break;
+    }
+
+} else {
+    // Acción no encontrada
+    header("HTTP/1.0 404 Not Found");
+    echo "<h1>404 - Página no encontrada</h1>";
 }
-?>
