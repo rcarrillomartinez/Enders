@@ -7,7 +7,7 @@ class TransferReservaController {
     private $model;
     private $pdo;
 
-    public function __construct(PDO $pdo) {
+    public function __construct($pdo) {
         $this->pdo = $pdo;
         $this->model = new TransferReserva($pdo);
     }
@@ -85,29 +85,95 @@ class TransferReservaController {
         }
     }
 
-
     public function create() {
-        include __DIR__ . '/../views/TransferReservaCreateView.php';
+        if (!Auth::isLoggedIn()) {
+            header('Location: ?action=auth');
+            exit();
+        }
+        // Reusing TransferReservaFormView for creation
+        include __DIR__ . '/../views/TransferReservaFormView.php';
     }
 
     public function store() {
+        if (!Auth::isLoggedIn() || $_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ?action=gestion_reservas');
+            exit();
+        }
         try {
-            
-            $data = [
-                'id_viajero' => isset($_POST['id_viajero']) ? intval($_POST['id_viajero']) : null,
-                'id_transfer' => isset($_POST['id_transfer']) ? intval($_POST['id_transfer']) : null,
-                'fecha_reserva' => $_POST['fecha_reserva'] ?? null,
-                'fecha_partida' => $_POST['fecha_partida'] ?? null,
-                'hora_partida' => $_POST['hora_partida'] ?? null,
-                'num_pasajeros' => isset($_POST['num_pasajeros']) ? intval($_POST['num_pasajeros']) : null,
-                'estado' => $_POST['estado'] ?? null,
-            ];
+            $this->model->create($_POST);
+            header('Location: ?action=gestion_reservas&status=created');
+            exit();
+        } catch (Exception $e) {
+            echo '<div style="color: red; padding: 20px;">';
+            echo '<h2>Error</h2>';
+            echo '<p>' . htmlspecialchars($e->getMessage()) . '</p>';
+            echo '</div>';
+        }
+    }
 
-            $insertedId = $this->model->create($data);
+    public function edit($id) {
+        if (!Auth::isLoggedIn()) {
+            header('Location: ?action=auth');
+            exit();
+        }
+        $reserva = $this->model->getById($id);
+        if (!$reserva) {
+            header('Location: ?action=gestion_reservas&status=notfound');
+            exit();
+        }
+        $data = $reserva; // Populate form with existing data
+        include __DIR__ . '/../views/TransferReservaFormView.php';
+    }
 
+    public function update() {
+        if (!Auth::isLoggedIn() || $_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ?action=gestion_reservas');
+            exit();
+        }
+        try {
+            $id = $_POST['id_reserva'] ?? null;
+            if (!$id) {
+                throw new Exception("ID de reserva no proporcionado.");
+            }
+            $this->model->update($id, $_POST);
+            header('Location: ?action=gestion_reservas&status=updated');
+            exit();
+        } catch (Exception $e) {
+            echo '<div style="color: red; padding: 20px;">';
+            echo '<h2>Error</h2>';
+            echo '<p>' . htmlspecialchars($e->getMessage()) . '</p>';
+            echo '</div>';
+        }
+    }
+
+    public function delete($id) {
+        if (!Auth::isLoggedIn()) {
+            header('Location: ?action=auth');
+            exit();
+        }
+        try {
+            $this->model->delete($id);
+            header('Location: ?action=gestion_reservas&status=deleted');
+            exit();
+        } catch (Exception $e) {
+            echo '<div style="color: red; padding: 20px;">';
+            echo '<h2>Error</h2>';
+            echo '<p>' . htmlspecialchars($e->getMessage()) . '</p>';
+            echo '</div>';
+        }
+    }
+
+    public function gestion() {
+        if (!Auth::isLoggedIn()) {
+            header('Location: ?action=auth');
+            exit();
+        }
+        try {
+            $user = Auth::getCurrentUser();
+            $filterByEmail = ($user['user_type'] !== 'admin') ? $user['user_email'] : null;
+            $reservas = $this->model->getAll($filterByEmail);
             
-            header('Location: /index.php?action=show&id=' . $insertedId);
-            exit;
+            include __DIR__ . '/../views/GestionReservasView.php';
         } catch (Exception $e) {
             echo '<div style="color: red; padding: 20px;">';
             echo '<h2>Error</h2>';

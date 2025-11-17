@@ -20,5 +20,11 @@ class Controller {
         $content = ob_get_clean();
         echo $content;
     }
+
+    public function redirect($url) {
+        header("Location: $url");
+        exit();
+    }
 }
+
 ?>

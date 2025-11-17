@@ -21,12 +21,40 @@
             padding: 20px;
         }
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
             background-color: white;
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        .navbar {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .navbar h2 { color: #333; font-size: 1.5em; }
+        .navbar-links { display: flex; gap: 20px; align-items: center; }
+        .navbar-links a { color: #667eea; text-decoration: none; font-weight: 600; transition: color 0.3s; }
+        .navbar-links a:hover { color: #764ba2; }
+        .logout-btn {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white !important;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .logout-btn:hover {
+            color: white !important;
+            opacity: 0.9;
         }
         h1 {
             color: #333;
@@ -103,8 +131,8 @@
         }
         .calendar td {
             border: 1px solid #e0e0e0;
-            padding: 12px;
-            height: 120px;
+            padding: 8px;
+            height: 100px;
             vertical-align: top;
             background-color: #fafafa;
             position: relative;
@@ -135,12 +163,12 @@
             list-style: none;
             padding: 0;
             margin: 0;
-            font-size: 0.85em;
+            font-size: 0.8em;
         }
         .reservation-item {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 6px 8px;
+            padding: 4px 6px;
             margin-bottom: 4px;
             border-radius: 4px;
             white-space: nowrap;
@@ -256,23 +284,20 @@
     </style>
 </head>
 <body>
+    <?php require_once __DIR__ . '/../models/Auth.php'; ?>
+    <?php if (Auth::isLoggedIn()): ?>
+        <div class="navbar">
+            <h2>🏝️ Transfer Reservas</h2>
+            <div class="navbar-links">
+                <a href="?action=dashboard">Dashboard</a>
+                <a href="?action=gestion_reservas">Gestionar Reservas</a>
+                <a href="?action=logout" class="logout-btn">🚪 Cerrar Sesión</a>
+            </div>
+        </div>
+    <?php endif; ?>
+
     <div class="container">
         <h1>📅 Calendario de Reservas</h1>
-        
-        <?php
-        require_once __DIR__ . '/../models/Auth.php';
-        if (Auth::isLoggedIn()) {
-            $user = Auth::getCurrentUser();
-            echo '<div class="stats" style="background: linear-gradient(135deg, #52c41a 0%, #389e0d 100%); margin-bottom: 20px;">';
-            echo 'Sesión activa: <strong>' . htmlspecialchars($user['user_name']) . '</strong> (' . $user['user_type'] . ') ';
-            echo '<a href="?action=logout" style="color: white; text-decoration: underline;">Cerrar sesión</a>';
-            echo '</div>';
-        } else {
-            echo '<div class="stats" style="background: linear-gradient(135deg, #1890ff 0%, #0050b3 100%); margin-bottom: 20px; text-align: center;">';
-            echo '<a href="?action=auth" style="color: white; text-decoration: none; font-weight: 600;">🔐 Iniciar sesión o Registrarse</a>';
-            echo '</div>';
-        }
-        ?>
         
         <?php
         if (!isset($reservas)) {

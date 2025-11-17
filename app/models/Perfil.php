@@ -10,7 +10,7 @@ class Perfil {
     private function getTableInfo(string $userType): array {
         return match (strtolower($userType)) {
             'admin' => ['table' => 'transfer_admin', 'id_col' => 'id_admin', 'identifier' => 'email'],
-            'viajero' => ['table' => 'viajero', 'id_col' => 'id_viajero', 'identifier' => 'email'],
+            'viajero' => ['table' => 'transfer_viajeros', 'id_col' => 'id_viajero', 'identifier' => 'email'],
             'hotel' => ['table' => 'hotel', 'id_col' => 'id_hotel', 'identifier' => 'usuario'],
             'vehiculo' => ['table' => 'vehiculo', 'id_col' => 'id_vehiculo', 'identifier' => 'email_conductor'],
             default => ['table' => null, 'id_col' => null, 'identifier' => null],
@@ -43,7 +43,7 @@ class Perfil {
             $updates[] = "email = :email";
             $params[':email'] = $data['email'];
         }
-        if (isset($data['nombre']) && $data['nombre'] && property_exists($info, 'nombre')) { // Asumo que nombre existe para viajeros/admin
+        if (isset($data['nombre']) && $data['nombre']) { 
              $updates[] = "nombre = :nombre";
              $params[':nombre'] = $data['nombre'];
         }
@@ -83,4 +83,3 @@ class Perfil {
         }
     }
 }
-
