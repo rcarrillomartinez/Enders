@@ -1,47 +1,60 @@
-<?php
-// app/views/PerfilView.php
-// Asume $user (sesión), $data (datos actuales), $errors, $message
+<h2>Perfil de Usuario</h2>
 
-$currentData = $data ?? [];
-$isViajero = $user['user_type'] === 'viajero';
-$identifierLabel = $isViajero || $user['user_type'] === 'admin' ? 'Email' : 'Usuario';
-$identifierValue = $currentData['email'] ?? $currentData['usuario'] ?? '';
-?>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Mi Perfil</title>
-    </head>
-<body>
-    <div class="container">
-        <h1>👤 Mi Perfil</h1>
-        <h2>Datos de <?= ucfirst($user['user_type']) ?></h2>
+<?php if(!empty($message)) echo "<p style='color: green;'>$message</p>"; ?>
+<?php if(!empty($errors)) foreach($errors as $error) echo "<p style='color: red;'>$error</p>"; ?>
 
-        <?php if (!empty($errors)): ?><div style="color: red;"><?= htmlspecialchars(implode(', ', $errors)) ?></div><?php endif; ?>
-        <?php if ($message): ?><div style="color: green;"><?= htmlspecialchars($message) ?></div><?php endif; ?>
+<form method="post" action="?action=updatePerfil">
+    <fieldset>
+        <legend>Datos básicos</legend>
+        <label>Nombre:
+            <input type="text" name="nombre" value="<?php echo htmlspecialchars($user['nombre'] ?? ''); ?>" readonly>
+        </label><br>
 
-        <form action="?action=profile_update" method="POST">
-            
-            <label for="identifier"><?= $identifierLabel ?>:</label>
-            <input type="text" name="email" id="identifier" value="<?= htmlspecialchars($identifierValue) ?>" required>
-            
-            <?php if (isset($currentData['nombre']) || $user['user_type'] === 'viajero'): // Mostrar nombre si existe o si es viajero/admin ?>
-            <label for="nombre">Nombre:</label>
-            <input type="text" name="nombre" id="nombre" value="<?= htmlspecialchars($currentData['nombre'] ?? '') ?>">
-            <?php endif; ?>
-            
-            <hr>
-            
-            <h3>Cambiar Contraseña (Dejar en blanco si no quieres cambiar)</h3>
-            <label for="new_password">Nueva Contraseña:</label>
-            <input type="password" name="new_password" id="new_password">
-            
-            <label for="confirm_password">Confirmar Nueva Contraseña:</label>
-            <input type="password" name="confirm_password" id="confirm_password">
-            
-            <button type="submit">Guardar Cambios</button>
-        </form>
-    </div>
-</body>
-</html>
+        <label>Primer Apellido:
+            <input type="text" name="apellido1" value="<?php echo htmlspecialchars($user['apellido1'] ?? ''); ?>" readonly>
+        </label><br>
+
+        <label>Segundo Apellido:
+            <input type="text" name="apellido2" value="<?php echo htmlspecialchars($user['apellido2'] ?? ''); ?>" readonly>
+        </label><br>
+
+        <label>Email:
+            <input type="email" name="email" value="<?php echo htmlspecialchars($user['email'] ?? ''); ?>" required>
+        </label>
+    </fieldset>
+
+    <fieldset>
+        <legend>Datos adicionales</legend>
+        <label>Dirección:
+            <input type="text" name="direccion" value="<?php echo htmlspecialchars($data['direccion'] ?? ''); ?>">
+        </label><br>
+
+        <label>Código Postal:
+            <input type="text" name="codigoPostal" value="<?php echo htmlspecialchars($data['codigoPostal'] ?? ''); ?>">
+        </label><br>
+
+        <label>Ciudad:
+            <input type="text" name="ciudad" value="<?php echo htmlspecialchars($data['ciudad'] ?? ''); ?>">
+        </label><br>
+
+        <label>País:
+            <input type="text" name="pais" value="<?php echo htmlspecialchars($data['pais'] ?? ''); ?>">
+        </label>
+    </fieldset>
+
+    <fieldset>
+        <legend>Cambiar contraseña</legend>
+        <label>Contraseña:
+            <input type="password" name="password">
+        </label><br>
+
+        <label>Confirmar Contraseña:
+            <input type="password" name="password_confirm">
+        </label>
+    </fieldset>
+
+    <button type="submit">Actualizar Perfil</button>
+</form>
+<form action="?action=dashboard" method="get" style="margin-top: 20px;">
+    <button type="submit">Volver</button>
+</form>
