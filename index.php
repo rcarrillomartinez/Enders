@@ -7,14 +7,10 @@ require_once __DIR__ . '/app/models/Auth.php';
 
 try {
     $pdo = Database::getInstance()->getConnection();
-    $action = $_GET['action'] ?? 'index';
-    $reserva_id = isset($_GET['id']) && is_numeric($_GET['id']) ? (int)$_GET['id'] : 0; 
-
-    if (!Auth::isLoggedIn() && !in_array($action, ['auth', 'login', 'register', 'signup'])) {
-        $action = 'auth';
-    }
-
-    if (in_array($action, ['auth','login','signup','register','logout','dashboard'])) {
+    
+    $action = isset($_GET['action']) ? $_GET['action'] : 'index';
+    
+    if (in_array($action, ['auth', 'login', 'register', 'signup', 'logout', 'dashboard', 'profile', 'profile_update'])) {
         require_once __DIR__ . '/app/controllers/AuthController.php';
         $controller = new AuthController($pdo);
         switch ($action) {
@@ -33,18 +29,35 @@ try {
             case 'profile_update':
                 if($_SERVER['REQUEST_METHOD']==='POST') $controller->update();
                 break;
+            case 'profile':
+                $controller->profile();
+                break;
+            case 'profile_update':
+                $controller->updateProfile();
+                break;
         }
     } else {
         require_once __DIR__ . '/app/controllers/TransferReservaController.php';
         $controller = new TransferReservaController($pdo);
-        switch ($action) {
-            case 'index': $controller->index(); break;
-            case 'create': $controller->create(); break;
-            case 'store': if($_SERVER['REQUEST_METHOD']==='POST') $controller->store(); break;
-            case 'edit': if($reserva_id>0) $controller->edit($reserva_id); break;
-            case 'editReserva': $controller->editReserva(); break;
-            case 'cancel': if($reserva_id>0) $controller->cancel($reserva_id); break;
-            default: $controller->index();
+        
+        $id = isset($_GET['id']) ? (int)$_GET['id'] : null;
+        
+        if ($action === 'gestion_reservas') {
+            $controller->gestion();
+        } elseif ($action === 'show' && $id) {
+            $controller->show($id);
+        } elseif ($action === 'create') {
+            $controller->create();
+        } elseif ($action === 'store' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+            $controller->store();
+        } elseif ($action === 'edit' && $id) {
+            $controller->edit($id);
+        } elseif ($action === 'update' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+            $controller->update();
+        } elseif ($action === 'delete' && $id) {
+            $controller->delete($id);
+        } else {
+            $controller->index();
         }
     }
 } catch (Exception $e) {

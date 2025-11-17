@@ -5,9 +5,9 @@ require_once __DIR__ . '/../models/TransferReserva.php';
 class TransferReservaController extends Controller {
     private TransferReserva $model;
 
-    public function __construct(PDO $pdo) {
-        parent::__construct($pdo);
-        $this->model = new TransferReserva($pdo); 
+    public function __construct($pdo) {
+        $this->pdo = $pdo;
+        $this->model = new TransferReserva($pdo);
     }
 
     public function index(): void {
@@ -52,35 +52,100 @@ class TransferReservaController extends Controller {
         ]);
     }
 
-    public function edit(int $id): void {
-        if (!Auth::isLoggedIn()) $this->redirect('?action=auth');
-
-        $reserva = $this->model->find($id); // ✅ usa la propiedad inicializada
-        if (!$reserva) {
-            $_SESSION['message'] = 'Error: Reserva no encontrada.';
-            $this->redirect('?action=index');
+    public function create() {
+        if (!Auth::isLoggedIn()) {
+            header('Location: ?action=auth');
+            exit();
         }
-
-        $currentUser = Auth::getCurrentUser();
-        if ($currentUser['user_type'] !== 'admin' && $currentUser['user_id'] !== $reserva['id_viajero']) {
-            $_SESSION['message'] = 'Error: No tienes permiso para editar esta reserva.';
-            $this->redirect('?action=index');
-        }
-
-        $this->view('TransferReservaView', ['reserva' => $reserva, 'data' => $reserva, 'errors' => []]);
+        // Reusing TransferReservaFormView for creation
+        include __DIR__ . '/../views/TransferReservaFormView.php';
     }
 
-    public function store(): void {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !Auth::isLoggedIn()) $this->redirect('?action=index');
+    public function store() {
+        if (!Auth::isLoggedIn() || $_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ?action=gestion_reservas');
+            exit();
+        }
+        try {
+            $this->model->create($_POST);
+            header('Location: ?action=gestion_reservas&status=created');
+            exit();
+        } catch (Exception $e) {
+            echo '<div style="color: red; padding: 20px;">';
+            echo '<h2>Error</h2>';
+            echo '<p>' . htmlspecialchars($e->getMessage()) . '</p>';
+            echo '</div>';
+        }
+    }
 
-        $data = $_POST;
-        $currentUser = Auth::getCurrentUser();
+    public function edit($id) {
+        if (!Auth::isLoggedIn()) {
+            header('Location: ?action=auth');
+            exit();
+        }
+        $reserva = $this->model->getById($id);
+        if (!$reserva) {
+            header('Location: ?action=gestion_reservas&status=notfound');
+            exit();
+        }
+        $data = $reserva; // Populate form with existing data
+        include __DIR__ . '/../views/TransferReservaFormView.php';
+    }
 
-        if (isset($data['id_reserva'])) {
-            $result = $this->model->update($data);
-        } else {
-            $idViajero = ($currentUser['user_type'] === 'viajero') ? $currentUser['user_id'] : null;
-            $result = $this->model->create($data, $idViajero);
+    public function update() {
+        if (!Auth::isLoggedIn() || $_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ?action=gestion_reservas');
+            exit();
+        }
+        try {
+            $id = $_POST['id_reserva'] ?? null;
+            if (!$id) {
+                throw new Exception("ID de reserva no proporcionado.");
+            }
+            $this->model->update($id, $_POST);
+            header('Location: ?action=gestion_reservas&status=updated');
+            exit();
+        } catch (Exception $e) {
+            echo '<div style="color: red; padding: 20px;">';
+            echo '<h2>Error</h2>';
+            echo '<p>' . htmlspecialchars($e->getMessage()) . '</p>';
+            echo '</div>';
+        }
+    }
+
+    public function delete($id) {
+        if (!Auth::isLoggedIn()) {
+            header('Location: ?action=auth');
+            exit();
+        }
+        try {
+            $this->model->delete($id);
+            header('Location: ?action=gestion_reservas&status=deleted');
+            exit();
+        } catch (Exception $e) {
+            echo '<div style="color: red; padding: 20px;">';
+            echo '<h2>Error</h2>';
+            echo '<p>' . htmlspecialchars($e->getMessage()) . '</p>';
+            echo '</div>';
+        }
+    }
+
+    public function gestion() {
+        if (!Auth::isLoggedIn()) {
+            header('Location: ?action=auth');
+            exit();
+        }
+        try {
+            $user = Auth::getCurrentUser();
+            $filterByEmail = ($user['user_type'] !== 'admin') ? $user['user_email'] : null;
+            $reservas = $this->model->getAll($filterByEmail);
+            
+            include __DIR__ . '/../views/GestionReservasView.php';
+        } catch (Exception $e) {
+            echo '<div style="color: red; padding: 20px;">';
+            echo '<h2>Error</h2>';
+            echo '<p>' . htmlspecialchars($e->getMessage()) . '</p>';
+            echo '</div>';
         }
 
         $_SESSION['message'] = $result['message'];

@@ -27,6 +27,9 @@
             align-items: center;
             border-radius: 8px;
             margin-bottom: 30px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .navbar h2 {
@@ -188,7 +191,6 @@
     <div class="navbar">
         <h2>🏝️ Transfer Reservas</h2>
         <div class="navbar-links">
-            <a href="?action=index">📅 Ver Reservas</a>
             <a href="?action=logout" class="logout-btn">🚪 Cerrar Sesión</a>
         </div>
     </div>
@@ -216,11 +218,14 @@
             </div>
 
             <div class="action-buttons">
+                <a href="?action=profile" class="action-btn">
+                    👤 Mi Perfil
+                </a>
+                <a href="?action=gestion_reservas" class="action-btn">
+                    📦 Gestionar Reservas
+                </a>
                 <a href="?action=index" class="action-btn secondary">
                     📅 Ver Calendario de Reservas
-                </a>
-                <a href="?action=logout" class="action-btn danger">
-                    🚪 Cerrar Sesión
                 </a>
             </div>
 

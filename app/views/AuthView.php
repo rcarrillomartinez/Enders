@@ -98,15 +98,17 @@ class AuthView {
                 <h1>🔐 Inicio de Sesión</h1>
                 <p class="subtitle">Accede a tu cuenta</p>
 
-                <?php if (isset($result) && is_array($result) && (isset($result['message']) || isset($result['success']))): ?>
-                    <div class="alert <?php echo ($result['success'] ?? false) ? 'alert-success' : 'alert-error'; ?>">
-                        <?php echo htmlspecialchars($result['message'] ?? 'Error desconocido'); ?>
-                    </div>
-                    <?php if ($result['success'] ?? false): ?>
-                        <p style="text-align: center; color: #156724; font-weight: 600;">
-                            Redirigiendo al calendario... <a href="?action=index">Ir al calendario</a>
-                        </p>
-                    <?php endif; ?>
+            <?php if (isset($result)): ?>
+                <div class="alert <?php echo $result['success'] ? 'alert-success' : 'alert-error'; ?>">
+                    <?php echo htmlspecialchars($result['message']); ?>
+                </div>
+                <?php if ($result['success']): ?>
+                    <p style="text-align: center; color: #155724; font-weight: 600;">
+                        Redirigiendo al panel de control...
+                    </p>
+                    <script>
+                        setTimeout(() => { window.location.href = '?action=dashboard'; }, 1500);
+                    </script>
                 <?php endif; ?>
 
                 <div class="user-type-tabs">

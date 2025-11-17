@@ -51,5 +51,11 @@ class Controller {
         header("Location: $url");
         exit;
     }
+
+    public function redirect($url) {
+        header("Location: $url");
+        exit();
+    }
 }
+
 ?>
