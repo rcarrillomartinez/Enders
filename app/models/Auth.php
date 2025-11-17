@@ -1,293 +1,279 @@
 <?php
 
 class Auth {
-    private $pdo;
+    private PDO $db;
     
-    public function __construct($pdo) {
-        $this->pdo = $pdo;
+    public function __construct(PDO $db) {
+        $this->db = $db;
+    }
+  
+    // Métodos de Mapeo / Utilidad (Mapper)
+
+    private function getTableName(string $userType): string|null {
+        return match (strtolower($userType)) {
+            'viajero' => 'transfer_viajeros', 
+            'vehiculo' => 'transfer_vehiculo',
+            'hotel' => 'tranfer_hotel', 
+            'admin' => 'transfer_admin',
+            default => null,
+        };
+    }
+    
+    private function getIdColumn(string $userType): string|null {
+        return match (strtolower($userType)) {
+            'viajero' => 'id_viajero', 
+            'vehiculo' => 'id_vehiculo',
+            'hotel' => 'id_hotel', 
+            'admin' => 'id_admin',
+            default => null,
+        };
+    }
+    
+    private function getIdentifierColumn(string $userType): string|null {
+        return match (strtolower($userType)) {
+            'viajero', 'admin' => 'email',
+            'vehiculo' => 'email_conductor',
+            'hotel' => 'usuario',
+            default => null,
+        };
     }
 
-    /**
-     * Register a hotel
-     */
-    public function registerHotel($usuario, $password, $id_zona = null) {
-        if (empty($usuario) || empty($password)) {
-            return ['success' => false, 'message' => 'Usuario y contraseña son requeridos'];
-        }
-
-        // Check if usuario already exists
-        $stmt = $this->pdo->prepare('SELECT id_hotel FROM tranfer_hotel WHERE usuario = :usuario');
-        $stmt->execute([':usuario' => $usuario]);
-        if ($stmt->fetch()) {
-            return ['success' => false, 'message' => 'El usuario ya existe'];
-        }
-
-        try {
-            $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
-            $stmt = $this->pdo->prepare('INSERT INTO tranfer_hotel (usuario, password, id_zona) VALUES (:usuario, :password, :id_zona)');
-            $result = $stmt->execute([
-                ':usuario' => $usuario,
-                ':password' => $hashedPassword,
-                ':id_zona' => $id_zona
-            ]);
-            
-            if ($result) {
-                return ['success' => true, 'message' => 'Hotel registrado exitosamente', 'id_hotel' => $this->pdo->lastInsertId()];
-            }
-        } catch (Exception $e) {
-            return ['success' => false, 'message' => 'Error al registrar hotel: ' . $e->getMessage()];
-        }
-    }
-
-    /**
-     * Register a vehicle/conductor
-     */
-    public function registerVehiculo($email_conductor, $descripcion, $password) {
-        if (empty($email_conductor) || empty($descripcion) || empty($password)) {
-            return ['success' => false, 'message' => 'Email, descripción y contraseña son requeridos'];
-        }
-
-        // Check if email already exists
-        $stmt = $this->pdo->prepare('SELECT id_vehiculo FROM transfer_vehiculo WHERE email_conductor = :email');
-        $stmt->execute([':email' => $email_conductor]);
-        if ($stmt->fetch()) {
-            return ['success' => false, 'message' => 'El email del conductor ya está registrado'];
-        }
-
-        try {
-            $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
-            $stmt = $this->pdo->prepare('INSERT INTO transfer_vehiculo (email_conductor, Descripción, password) VALUES (:email, :descripcion, :password)');
-            $result = $stmt->execute([
-                ':email' => $email_conductor,
-                ':descripcion' => $descripcion,
-                ':password' => $hashedPassword
-            ]);
-            
-            if ($result) {
-                return ['success' => true, 'message' => 'Vehículo registrado exitosamente', 'id_vehiculo' => $this->pdo->lastInsertId()];
-            }
-        } catch (Exception $e) {
-            return ['success' => false, 'message' => 'Error al registrar vehículo: ' . $e->getMessage()];
-        }
-    }
-
-    /**
-     * Register a traveler
-     */
-    public function registerViajero($email, $nombre, $apellido1, $apellido2, $direccion, $codigoPostal, $ciudad, $pais, $password) {
-        if (empty($email) || empty($nombre) || empty($apellido1) || empty($password)) {
-            return ['success' => false, 'message' => 'Email, nombre, apellido y contraseña son requeridos'];
-        }
-
-        // Check if email already exists
-        $stmt = $this->pdo->prepare('SELECT id_viajero FROM transfer_viajeros WHERE email = :email');
-        $stmt->execute([':email' => $email]);
-        if ($stmt->fetch()) {
-            return ['success' => false, 'message' => 'El email ya está registrado'];
-        }
-
-        try {
-            $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
-            $stmt = $this->pdo->prepare('
-                INSERT INTO transfer_viajeros 
-                (email, nombre, apellido1, apellido2, direccion, codigoPostal, ciudad, pais, password) 
-                VALUES (:email, :nombre, :apellido1, :apellido2, :direccion, :codigoPostal, :ciudad, :pais, :password)
-            ');
-            $result = $stmt->execute([
-                ':email' => $email,
-                ':nombre' => $nombre,
-                ':apellido1' => $apellido1,
-                ':apellido2' => $apellido2 ?? '',
-                ':direccion' => $direccion ?? '',
-                ':codigoPostal' => $codigoPostal ?? '',
-                ':ciudad' => $ciudad ?? '',
-                ':pais' => $pais ?? '',
-                ':password' => $hashedPassword
-            ]);
-            
-            if ($result) {
-                return ['success' => true, 'message' => 'Viajero registrado exitosamente', 'id_viajero' => $this->pdo->lastInsertId()];
-            }
-        } catch (Exception $e) {
-            return ['success' => false, 'message' => 'Error al registrar viajero: ' . $e->getMessage()];
-        }
-    }
-
-    /**
-     * Login hotel
-     */
-    public function loginHotel($usuario, $password) {
-        if (empty($usuario) || empty($password)) {
-            return ['success' => false, 'message' => 'Usuario y contraseña son requeridos'];
-        }
-
-        try {
-            $stmt = $this->pdo->prepare('SELECT * FROM tranfer_hotel WHERE usuario = :usuario');
-            $stmt->execute([':usuario' => $usuario]);
-            $hotel = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if ($hotel && password_verify($password, $hotel['password'])) {
-                $_SESSION['user_type'] = 'hotel';
-                $_SESSION['user_id'] = $hotel['id_hotel'];
-                $_SESSION['user_name'] = $hotel['usuario'];
-                $_SESSION['user_email'] = null;
-                return ['success' => true, 'message' => 'Inicio de sesión exitoso', 'user' => $hotel];
-            }
-
-            return ['success' => false, 'message' => 'Usuario o contraseña incorrectos'];
-        } catch (Exception $e) {
-            return ['success' => false, 'message' => 'Error en el login: ' . $e->getMessage()];
-        }
-    }
-
-    /**
-     * Login vehicle/conductor
-     */
-    public function loginVehiculo($email, $password) {
-        if (empty($email) || empty($password)) {
-            return ['success' => false, 'message' => 'Email y contraseña son requeridos'];
-        }
-
-        try {
-            $stmt = $this->pdo->prepare('SELECT * FROM transfer_vehiculo WHERE email_conductor = :email');
-            $stmt->execute([':email' => $email]);
-            $vehiculo = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if ($vehiculo && password_verify($password, $vehiculo['password'])) {
-                $_SESSION['user_type'] = 'vehiculo';
-                $_SESSION['user_id'] = $vehiculo['id_vehiculo'];
-                $_SESSION['user_name'] = $vehiculo['email_conductor'];
-                $_SESSION['user_email'] = $vehiculo['email_conductor'];
-                return ['success' => true, 'message' => 'Inicio de sesión exitoso', 'user' => $vehiculo];
-            }
-
-            return ['success' => false, 'message' => 'Email o contraseña incorrectos'];
-        } catch (Exception $e) {
-            return ['success' => false, 'message' => 'Error en el login: ' . $e->getMessage()];
-        }
-    }
-
-    /**
-     * Login traveler
-     */
-    public function loginViajero($email, $password) {
-        if (empty($email) || empty($password)) {
-            return ['success' => false, 'message' => 'Email y contraseña son requeridos'];
-        }
-
-        try {
-            $stmt = $this->pdo->prepare('SELECT * FROM transfer_viajeros WHERE email = :email');
-            $stmt->execute([':email' => $email]);
-            $viajero = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if ($viajero && password_verify($password, $viajero['password'])) {
-                $_SESSION['user_type'] = 'viajero';
-                $_SESSION['user_id'] = $viajero['id_viajero'];
-                $_SESSION['user_name'] = $viajero['nombre'] . ' ' . $viajero['apellido1'];
-                $_SESSION['user_email'] = $viajero['email'];
-                return ['success' => true, 'message' => 'Inicio de sesión exitoso', 'user' => $viajero];
-            }
-
-            return ['success' => false, 'message' => 'Email o contraseña incorrectos'];
-        } catch (Exception $e) {
-            return ['success' => false, 'message' => 'Error en el login: ' . $e->getMessage()];
-        }
-    }
-
-    /**
-     * Register an admin user
-     */
-    public function registerAdmin($email, $nombre, $password) {
-        if (empty($email) || empty($nombre) || empty($password)) {
-            return ['success' => false, 'message' => 'Email, nombre y contraseña son requeridos'];
-        }
-
-        // Check if email already exists in admin table
-        $stmt = $this->pdo->prepare('SELECT id_admin FROM transfer_admin WHERE email = :email');
-        $stmt->execute([':email' => $email]);
-        if ($stmt->fetch()) {
-            return ['success' => false, 'message' => 'El email del admin ya está registrado'];
-        }
-
-        try {
-            $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
-            $stmt = $this->pdo->prepare('INSERT INTO transfer_admin (email, nombre, password) VALUES (:email, :nombre, :password)');
-            $result = $stmt->execute([
-                ':email' => $email,
-                ':nombre' => $nombre,
-                ':password' => $hashedPassword
-            ]);
-            
-            if ($result) {
-                return ['success' => true, 'message' => 'Admin registrado exitosamente', 'id_admin' => $this->pdo->lastInsertId()];
-            }
-        } catch (Exception $e) {
-            return ['success' => false, 'message' => 'Error al registrar admin: ' . $e->getMessage()];
-        }
-    }
-
-    /**
-     * Login admin
-     */
-    public function loginAdmin($email, $password) {
-        if (empty($email) || empty($password)) {
-            return ['success' => false, 'message' => 'Email y contraseña son requeridos'];
-        }
-
-        try {
-            $stmt = $this->pdo->prepare('SELECT * FROM transfer_admin WHERE email = :email');
-            $stmt->execute([':email' => $email]);
-            $admin = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if ($admin && password_verify($password, $admin['password'])) {
-                $_SESSION['user_type'] = 'admin';
-                $_SESSION['user_id'] = $admin['id_admin'];
-                $_SESSION['user_name'] = $admin['nombre'];
-                $_SESSION['user_email'] = $admin['email'];
-                return ['success' => true, 'message' => 'Inicio de sesión exitoso', 'user' => $admin];
-            }
-
-            return ['success' => false, 'message' => 'Email o contraseña incorrectos'];
-        } catch (Exception $e) {
-            return ['success' => false, 'message' => 'Error en el login: ' . $e->getMessage()];
-        }
-    }
-
-    /**
-     * Logout
-     */
-    public function logout() {
-        session_destroy();
-        return ['success' => true, 'message' => 'Sesión cerrada'];
-    }
-
-    /**
-     * Check if user is logged in
-     */
-    public static function isLoggedIn() {
+    // Métodos de sesión (Estáticos)
+    
+    public static function isLoggedIn(): bool {
         return isset($_SESSION['user_id']) && isset($_SESSION['user_type']);
     }
 
-    /**
-     * Check if user is admin
-     */
-    public static function isAdmin() {
-        return isset($_SESSION['user_type']) && $_SESSION['user_type'] === 'admin';
+    public static function isAdmin(): bool {
+        return self::isLoggedIn() && $_SESSION['user_type'] === 'admin';
     }
 
-    /**
-     * Get current user info
-     */
-    public static function getCurrentUser() {
+    public static function getCurrentUser(): array|null {
         if (self::isLoggedIn()) {
             return [
                 'user_id' => $_SESSION['user_id'],
                 'user_type' => $_SESSION['user_type'],
                 'user_name' => $_SESSION['user_name'] ?? 'Usuario',
-                'user_email' => $_SESSION['user_email'] ?? null
+                'email' => $_SESSION['email'] ?? '', 
             ];
         }
         return null;
     }
+
+    public static function logout(): void {
+        session_unset();
+        session_destroy();
+        $_SESSION = [];
+    }
+
+    // Lógica de Login (Centralizada) 
+
+    /**
+     * Intenta loggear al usuario basándose en el tipo y credenciales.
+     */
+    public function login(string $userType, string $identifier, string $password): array {
+        if (empty($identifier) || empty($password)) {
+            return ['success' => false, 'message' => 'Identificador y contraseña son requeridos'];
+        }
+
+        $userType = strtolower($userType);
+        $tableName = $this->getTableName($userType);
+        $idCol = $this->getIdColumn($userType);
+        $identifierCol = $this->getIdentifierColumn($userType);
+
+        if (!$tableName) {
+            return ['success' => false, 'message' => "Tipo de usuario inválido."];
+        }
+
+        try {
+            // Seleccionamos todos los campos necesarios
+            $stmt = $this->db->prepare("SELECT * FROM {$tableName} WHERE {$identifierCol} = :identifier");
+            $stmt->execute([':identifier' => $identifier]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($user && password_verify($password, $user['password'])) {
+
+                // Determinar nombre y email para la sesión
+                $userName = $identifier; // por defecto
+                $userEmail = $identifier; // por defecto
+
+                switch ($userType) {
+    case 'viajero':
+    case 'admin':
+        $_SESSION['email'] = $user['email'];
+        break;
+
+    case 'vehiculo':
+        $_SESSION['email'] = $user['email_conductor'];
+        break;
+
+    case 'hotel':
+        $_SESSION['email'] = $user['usuario'];  // O cámbialo si tienes un campo email real
+        break;
+
+    default:
+        $_SESSION['email'] = '';
 }
-?>
+
+
+                // Guardamos en sesión
+                $_SESSION['user_id'] = $user[$idCol];
+                $_SESSION['user_type'] = $userType;
+                $_SESSION['user_name'] = $userName;
+                $_SESSION['email'] = $user[$this->getIdentifierColumn($userType)]; 
+
+                return ['success' => true, 'message' => "¡Bienvenido!"];
+            } else {
+                return ['success' => false, 'message' => 'Credenciales incorrectas.'];
+            }
+        } catch (\PDOException $e) {
+            error_log("Login error: " . $e->getMessage());
+            return ['success' => false, 'message' => 'Error de base de datos durante el login.'];
+        }
+    }
+
+
+    // lógica de registro (Individual) 
+
+    /**
+     * Registra un hotel.
+     */
+    public function registerHotel(array $data): array {
+        if (empty($data['usuario']) || empty($data['password'])) {
+            return ['success' => false, 'message' => 'Usuario y contraseña son requeridos'];
+        }
+
+        try {
+            $stmt = $this->db->prepare('SELECT id_hotel FROM tranfer_hotel WHERE usuario = :usuario');
+            $stmt->execute([':usuario' => $data['usuario']]);
+            if ($stmt->fetch()) {
+                return ['success' => false, 'message' => 'El usuario ya existe'];
+            }
+
+            $hashedPassword = password_hash($data['password'], PASSWORD_BCRYPT);
+            $stmt = $this->db->prepare('INSERT INTO tranfer_hotel (usuario, password, id_zona) VALUES (:usuario, :password, :id_zona)');
+            $result = $stmt->execute([
+                ':usuario' => $data['usuario'],
+                ':password' => $hashedPassword,
+                ':id_zona' => $data['id_zona'] ?? null
+            ]);
+            
+            if ($result) {
+                return ['success' => true, 'message' => 'Hotel registrado exitosamente', 'id_hotel' => $this->db->lastInsertId()];
+            }
+        } catch (\PDOException $e) {
+            error_log("Registro Hotel error: " . $e->getMessage());
+            return ['success' => false, 'message' => 'Error de base de datos al registrar.'];
+        }
+        return ['success' => false, 'message' => 'Error al registrar hotel.'];
+    }
+
+    /**
+     * Registra un vehículo/conductor.
+     */
+    public function registerVehiculo(array $data): array {
+        if (empty($data['email_conductor']) || empty($data['descripcion']) || empty($data['password'])) {
+            return ['success' => false, 'message' => 'Email, descripción y contraseña son requeridos'];
+        }
+
+        try {
+            $stmt = $this->db->prepare('SELECT id_vehiculo FROM transfer_vehiculo WHERE email_conductor = :email');
+            $stmt->execute([':email' => $data['email_conductor']]);
+            if ($stmt->fetch()) {
+                return ['success' => false, 'message' => 'El email del conductor ya está registrado'];
+            }
+
+            $hashedPassword = password_hash($data['password'], PASSWORD_BCRYPT);
+            $stmt = $this->db->prepare('INSERT INTO transfer_vehiculo (email_conductor, Descripción, password) VALUES (:email, :descripcion, :password)');
+            $result = $stmt->execute([
+                ':email' => $data['email_conductor'],
+                ':descripcion' => $data['descripcion'],
+                ':password' => $hashedPassword
+            ]);
+            
+            if ($result) {
+                return ['success' => true, 'message' => 'Vehículo registrado exitosamente', 'id_vehiculo' => $this->db->lastInsertId()];
+            }
+        } catch (\PDOException $e) {
+            error_log("Registro Vehiculo error: " . $e->getMessage());
+            return ['success' => false, 'message' => 'Error de base de datos al registrar.'];
+        }
+        return ['success' => false, 'message' => 'Error al registrar vehículo.'];
+    }
+
+    /**
+     * Registra un viajero.
+     */
+    public function registerViajero(array $data): array {
+        if (empty($data['email']) || empty($data['nombre']) || empty($data['apellido1']) || empty($data['password'])) {
+            return ['success' => false, 'message' => 'Email, nombre, apellido y contraseña son requeridos'];
+        }
+
+        try {
+            $stmt = $this->db->prepare('SELECT id_viajero FROM transfer_viajeros WHERE email = :email');
+            $stmt->execute([':email' => $data['email']]);
+            if ($stmt->fetch()) {
+                return ['success' => false, 'message' => 'El email ya está registrado'];
+            }
+
+            $hashedPassword = password_hash($data['password'], PASSWORD_BCRYPT);
+            $stmt = $this->db->prepare('
+                INSERT INTO transfer_viajeros 
+                (email, nombre, apellido1, apellido2, direccion, codigoPostal, ciudad, pais, password) 
+                VALUES (:email, :nombre, :apellido1, :apellido2, :direccion, :codigoPostal, :ciudad, :pais, :password)
+            ');
+            $result = $stmt->execute([
+                ':email' => $data['email'],
+                ':nombre' => $data['nombre'],
+                ':apellido1' => $data['apellido1'],
+                ':apellido2' => $data['apellido2'] ?? '',
+                ':direccion' => $data['direccion'] ?? '',
+                ':codigoPostal' => $data['codigoPostal'] ?? '',
+                ':ciudad' => $data['ciudad'] ?? '',
+                ':pais' => $data['pais'] ?? '',
+                ':password' => $hashedPassword
+            ]);
+            
+            if ($result) {
+                return ['success' => true, 'message' => 'Viajero registrado exitosamente', 'id_viajero' => $this->db->lastInsertId()];
+            }
+        } catch (\PDOException $e) {
+             error_log("Registro Viajero error: " . $e->getMessage());
+             return ['success' => false, 'message' => 'Error de base de datos al registrar.'];
+        }
+        return ['success' => false, 'message' => 'Error al registrar viajero.'];
+    }
+    
+    /**
+     * Registra un usuario administrador.
+     */
+    public function registerAdmin(array $data): array {
+        if (empty($data['email']) || empty($data['nombre']) || empty($data['password'])) {
+            return ['success' => false, 'message' => 'Email, nombre y contraseña son requeridos'];
+        }
+
+        try {
+            $stmt = $this->db->prepare('SELECT id_admin FROM transfer_admin WHERE email = :email');
+            $stmt->execute([':email' => $data['email']]);
+            if ($stmt->fetch()) {
+                return ['success' => false, 'message' => 'El email del admin ya está registrado'];
+            }
+
+            $hashedPassword = password_hash($data['password'], PASSWORD_BCRYPT);
+            $stmt = $this->db->prepare('INSERT INTO transfer_admin (email, nombre, password) VALUES (:email, :nombre, :password)');
+            $result = $stmt->execute([
+                ':email' => $data['email'],
+                ':nombre' => $data['nombre'],
+                ':password' => $hashedPassword
+            ]);
+            
+            if ($result) {
+                return ['success' => true, 'message' => 'Admin registrado exitosamente', 'id_admin' => $this->db->lastInsertId()];
+            }
+        } catch (\PDOException $e) {
+            error_log("Registro Admin error: " . $e->getMessage());
+            return ['success' => false, 'message' => 'Error de base de datos al registrar.'];
+        }
+        return ['success' => false, 'message' => 'Error al registrar admin.'];
+    }
+}

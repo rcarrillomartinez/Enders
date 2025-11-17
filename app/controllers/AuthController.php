@@ -1,167 +1,126 @@
 <?php
 
 require_once __DIR__ . '/../core/Controller.php';
+require_once __DIR__ . '/../views/AuthView.php';
+require_once __DIR__ . '/../models/Auth.php';
+require_once __DIR__ . '/../core/Database.php'; // Singleton Database
 
 class AuthController extends Controller {
-    private $auth;
 
-    public function __construct($pdo) {
-        parent::__construct($pdo);
-        require_once __DIR__ . '/../models/Auth.php';
-        $this->auth = new Auth($pdo);
+    protected  PDO $db;
+
+    public function __construct() {
+        // Obtener la conexión PDO usando el singleton
+        $database = Database::getInstance(); 
+        $this->db = $database->getConnection();
+
+        // Iniciar sesión si no está iniciada
+        if(session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
     }
 
-    /**
-     * La página de login/signup
-     */
-    public function index() {
-        return $this->view('AuthView', [
-            'page' => 'login'
-        ]);
+    // ------------------------------
+    // Métodos de formularios
+    // ------------------------------
+
+    public function auth(): void {
+        $result = $_SESSION['auth_result'] ?? null;
+        $formData = $_SESSION['auth_data'] ?? []; 
+        
+        AuthView::renderLoginForm($result, $formData); 
+        unset($_SESSION['auth_result'], $_SESSION['auth_data']);
     }
 
-    public function signup() {
-        return $this->view('AuthView', [
-            'page' => 'signup'
-        ]);
+    public function signup(): void {
+        $result = $_SESSION['auth_result'] ?? null;
+        $formData = $_SESSION['auth_data'] ?? []; 
+
+        AuthView::renderSignupForm($result, $formData); 
+        unset($_SESSION['auth_result'], $_SESSION['auth_data']);
     }
 
-    public function login() {
+    // ------------------------------
+    // Login
+    // ------------------------------
+
+    public function login(): void {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            return $this->signup();
+            $this->redirect('?action=auth');
         }
 
-        $user_type = $_POST['user_type'] ?? 'viajero';
-        $result = null;
+        $userType = $_POST['user_type'] ?? '';
+        $identifier = $_POST['identifier'] ?? '';
+        $password = $_POST['password'] ?? '';
 
-        switch ($user_type) {
-            case 'admin':
-                $result = $this->auth->loginAdmin($_POST['email'] ?? '', $_POST['password'] ?? '');
-                break;
-            case 'hotel':
-                $result = $this->auth->loginHotel($_POST['usuario'] ?? '', $_POST['password'] ?? '');
-                break;
-            case 'vehiculo':
-                $result = $this->auth->loginVehiculo($_POST['email'] ?? '', $_POST['password'] ?? '');
-                break;
-            case 'viajero':
-                $result = $this->auth->loginViajero($_POST['email'] ?? '', $_POST['password'] ?? '');
-                break;
+        $authModel = new Auth($this->db);
+        $result = $authModel->login($userType, $identifier, $password);
+
+        if ($result['success']) {
+            $this->redirect('?action=index');
+        } else {
+            $_SESSION['auth_result'] = $result;
+            $_SESSION['auth_data'] = [
+                'user_type' => $userType,
+                'identifier' => $identifier
+            ];
+            $this->redirect('?action=auth');
         }
-
-        // Si el login es exitoso, redirige al calendario
-        if ($result && $result['success']) {
-            header('Location: ?action=index');
-            exit();
-        }
-
-        return $this->view('AuthView', [
-            'page' => 'login',
-            'result' => $result,
-            'user_type' => $user_type
-        ]);
     }
 
+    // ------------------------------
+    // Registro
+    // ------------------------------
 
-    public function register() {
+    public function register(): void {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            return $this->signup();
+            $this->redirect('?action=signup');
         }
 
-        $user_type = $_POST['user_type'] ?? 'viajero';
-        $result = null;
+        $userType = strtolower($_POST['user_type'] ?? '');
+        $authModel = new Auth($this->db);
+        $result = ['success' => false, 'message' => 'Tipo de registro no soportado o inválido.'];
 
-        switch ($user_type) {
-            case 'hotel':
-                $result = $this->auth->registerHotel(
-                    $_POST['usuario'] ?? '',
-                    $_POST['password'] ?? '',
-                    $_POST['id_zona'] ?? null
-                );
-                break;
+        match ($userType) {
+            'viajero' => $result = $authModel->registerViajero($_POST),
+            'vehiculo' => $result = $authModel->registerVehiculo($_POST),
+            'hotel' => $result = $authModel->registerHotel($_POST),
+            'admin' => $result = $authModel->registerAdmin($_POST),
+            default => $result = ['success' => false, 'message' => 'Tipo de usuario inválido.']
+        };
 
-            case 'vehiculo':
-                $result = $this->auth->registerVehiculo(
-                    $_POST['email_conductor'] ?? '',
-                    $_POST['descripcion'] ?? '',
-                    $_POST['password'] ?? ''
-                );
-                break;
+        $_SESSION['auth_result'] = $result;
+        $_SESSION['auth_data'] = $_POST;
+        unset($_SESSION['auth_data']['password']); 
 
-            case 'viajero':
-                $result = $this->auth->registerViajero(
-                    $_POST['email'] ?? '',
-                    $_POST['nombre'] ?? '',
-                    $_POST['apellido1'] ?? '',
-                    $_POST['apellido2'] ?? '',
-                    $_POST['direccion'] ?? '',
-                    $_POST['codigoPostal'] ?? '',
-                    $_POST['ciudad'] ?? '',
-                    $_POST['pais'] ?? '',
-                    $_POST['password'] ?? ''
-                );
-                break;
-        }
-
-        // Si el registro es exitoso, redirige al calendario
-        if ($result && $result['success']) {
-            // Auto-login el usuario recién registrado
-            if ($user_type === 'viajero') {
-                $loginResult = $this->auth->loginViajero(
-                    $_POST['email'] ?? '',
-                    $_POST['password'] ?? ''
-                );
-                if ($loginResult['success']) {
-                    header('Location: ?action=index');
-                    exit();
-                }
-            } elseif ($user_type === 'vehiculo') {
-                $loginResult = $this->auth->loginVehiculo(
-                    $_POST['email_conductor'] ?? '',
-                    $_POST['password'] ?? ''
-                );
-                if ($loginResult['success']) {
-                    header('Location: ?action=index');
-                    exit();
-                }
-            } elseif ($user_type === 'hotel') {
-                $loginResult = $this->auth->loginHotel(
-                    $_POST['usuario'] ?? '',
-                    $_POST['password'] ?? ''
-                );
-                if ($loginResult['success']) {
-                    header('Location: ?action=index');
-                    exit();
-                }
-            }
-        }
-
-        return $this->view('AuthView', [
-            'page' => 'signup',
-            'result' => $result,
-            'user_type' => $user_type
-        ]);
+        $this->redirect('?action=signup');
     }
 
-    /**
-     * Logout
-     */
-    public function logout() {
-        $this->auth->logout();
-        header('Location: ?action=auth');
-        exit();
+    // ------------------------------
+    // Logout
+    // ------------------------------
+
+    public function logout(): void {
+        Auth::logout(); // Método estático
+        $this->redirect('?action=auth');
     }
 
-    public function dashboard() {
-        if (!Auth::isLoggedIn()) {
-            header('Location: ?action=auth');
-            exit();
-        }
+    // ------------------------------
+    // Dashboard o página principal
+    // ------------------------------
 
-        $user = Auth::getCurrentUser();
-        return $this->view('AuthDashboardView', [
-            'user' => $user
-        ]);
+    public function dashboard(): void {
+        $this->redirect('?action=index');
+    }
+
+    // ------------------------------
+    // Método de redirección
+    // ------------------------------
+
+    protected function redirect(string $url): void {
+        header("Location: $url");
+        exit;
     }
 }
+
 ?>

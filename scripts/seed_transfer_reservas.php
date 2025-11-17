@@ -1,105 +1,147 @@
 <?php
+// scripts/seed_transfer_reservas.php
+// Script de inicialización para crear la tabla transfer_reservas e insertar datos de ejemplo.
+// Diseñado para ser ejecutado desde la CLI (Command Line Interface).
 
 // Base de datos y tabla transfer_reservas
+// NOTA: Asegúrate de que este archivo Database.php configure la conexión y defina DB_NAME si lo usas.
 require_once __DIR__ . '/../app/core/Database.php';
+
+// Mensaje de inicio para la terminal
+echo "⚙️ Inicialización de la Tabla `transfer_reservas`..." . PHP_EOL;
+
 try {
     $pdo = Database::getInstance()->getConnection();
+    // Intentamos obtener el nombre de la DB si es necesario para el paso 2
+    $dbName = defined('DB_NAME') ? DB_NAME : null;
 } catch (PDOException $e) {
-    echo "Connection failed: " . $e->getMessage() . PHP_EOL;
-    exit(1);
+    echo "❌ Error de Conexión a la Base de Datos: " . $e->getMessage() . PHP_EOL;
+    exit(1); // Sale con error
 }
 
+// 1️⃣ Crear tabla transfer_reservas si no existe
 $createSql = <<<SQL
 CREATE TABLE IF NOT EXISTS transfer_reservas (
-  id_reserva INT AUTO_INCREMENT PRIMARY KEY,
-  localizador VARCHAR(100) NOT NULL,
-  id_hotel INT NULL,
-  id_tipo_reserva INT NOT NULL,
-  email_cliente VARCHAR(100) NOT NULL,
-  fecha_reserva DATETIME NOT NULL,
-  fecha_modificacion DATETIME NOT NULL,
-  id_destino INT NOT NULL,
-  fecha_entrada DATE NOT NULL,
-  hora_entrada TIME NOT NULL,
-  numero_vuelo_entrada VARCHAR(50) NOT NULL,
-  origen_vuelo_entrada VARCHAR(50) NOT NULL,
-  hora_vuelo_salida TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  fecha_vuelo_salida DATE NOT NULL,
-  num_viajeros INT NOT NULL,
-  id_vehiculo INT NOT NULL,
-  id_viajero INT NULL,
-  id_transfer INT NULL,
-  fecha_partida DATE NULL,
-  hora_partida TIME NULL,
-  num_pasajeros INT NULL,
-  estado VARCHAR(50) NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id_reserva INT AUTO_INCREMENT PRIMARY KEY,
+    localizador VARCHAR(100) UNIQUE NOT NULL, 
+    id_hotel INT NULL,
+    id_tipo_reserva INT NOT NULL,
+    email_cliente VARCHAR(100) NOT NULL,
+    fecha_reserva DATETIME NOT NULL,
+    fecha_modificacion DATETIME NOT NULL,
+    id_destino INT NOT NULL,
+    fecha_entrada DATE NOT NULL,
+    hora_entrada TIME NOT NULL,
+    numero_vuelo_entrada VARCHAR(50) NOT NULL,
+    origen_vuelo_entrada VARCHAR(50) NOT NULL,
+    hora_vuelo_salida TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+    fecha_vuelo_salida DATE NOT NULL,
+    num_viajeros INT NOT NULL,
+    id_vehiculo INT NOT NULL,
+    id_viajero INT NULL,
+    id_transfer INT NULL,
+    fecha_partida DATE NULL,
+    hora_partida TIME NULL,
+    num_pasajeros INT NULL,
+    estado VARCHAR(100) NULL, -- CORRECCIÓN: Aumentado de 50 a 100 para evitar Data Truncated (Warning 1265)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 SQL;
 
-$pdo->exec($createSql);
+try {
+    // Si la tabla ya existe, la recreamos o verificamos. Para evitar el error de 
+    // Data Truncated sin borrar datos si es una tabla de desarrollo, 
+    // la opción más segura es asegurarse de que el campo sea lo suficientemente grande.
+    $pdo->exec($createSql);
+    echo "✅ Tabla `transfer_reservas` creada o verificada correctamente." . PHP_EOL;
+} catch (Exception $e) {
+    echo "❌ Error al crear la tabla `transfer_reservas`: " . $e->getMessage() . PHP_EOL;
+    // No salimos con error fatal aquí, permitimos que continúe si es posible
+}
 
-$expectedCols = [
-    'id_reserva' => "INT AUTO_INCREMENT PRIMARY KEY",
-    'localizador' => "VARCHAR(100) NOT NULL",
-    'id_hotel' => "INT NULL",
-    'id_tipo_reserva' => "INT NOT NULL",
-    'email_cliente' => "VARCHAR(100) NOT NULL",
-    'fecha_reserva' => "DATETIME NOT NULL",
-    'fecha_modificacion' => "DATETIME NOT NULL",
-    'id_destino' => "INT NOT NULL",
-    'fecha_entrada' => "DATE NOT NULL",
-    'hora_entrada' => "TIME NOT NULL",
-    'numero_vuelo_entrada' => "VARCHAR(50) NOT NULL",
-    'origen_vuelo_entrada' => "VARCHAR(50) NOT NULL",
-    'hora_vuelo_salida' => "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
-    'fecha_vuelo_salida' => "DATE NOT NULL",
-    'num_viajeros' => "INT NOT NULL",
-    'id_vehiculo' => "INT NOT NULL",
-    'id_viajero' => "INT NULL",
-    'id_transfer' => "INT NULL",
-    'fecha_partida' => "DATE NULL",
-    'hora_partida' => "TIME NULL",
-    'num_pasajeros' => "INT NULL",
-    'estado' => "VARCHAR(50) NULL",
-    'created_at' => "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
-];
 
-$colStmt = $pdo->prepare("SELECT COLUMN_NAME FROM information_schema.columns WHERE table_schema = :db AND table_name = 'transfer_reservas'");
-$colStmt->execute([':db' => DB_NAME]);
-$existing = $colStmt->fetchAll(PDO::FETCH_COLUMN);
-$existing = array_map('strtolower', $existing);
+// 2️⃣ Verificar columnas existentes y agregar las que faltan (si DB_NAME está disponible)
+if (!$dbName) {
+    echo "⚠️ Advertencia: El nombre de la base de datos (DB_NAME) no está disponible. Se omite la verificación/adición de columnas." . PHP_EOL;
+} else {
+    $expectedCols = [
+        'id_reserva' => "INT AUTO_INCREMENT PRIMARY KEY",
+        'localizador' => "VARCHAR(100) UNIQUE NOT NULL",
+        'id_hotel' => "INT NULL",
+        'id_tipo_reserva' => "INT NOT NULL",
+        'email_cliente' => "VARCHAR(100) NOT NULL",
+        'fecha_reserva' => "DATETIME NOT NULL",
+        'fecha_modificacion' => "DATETIME NOT NULL",
+        'id_destino' => "INT NOT NULL",
+        'fecha_entrada' => "DATE NOT NULL",
+        'hora_entrada' => "TIME NOT NULL",
+        'numero_vuelo_entrada' => "VARCHAR(50) NOT NULL",
+        'origen_vuelo_entrada' => "VARCHAR(50) NOT NULL",
+        'hora_vuelo_salida' => "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP",
+        'fecha_vuelo_salida' => "DATE NOT NULL",
+        'num_viajeros' => "INT NOT NULL",
+        'id_vehiculo' => "INT NOT NULL",
+        'id_viajero' => "INT NULL",
+        'id_transfer' => "INT NULL",
+        'fecha_partida' => "DATE NULL",
+        'hora_partida' => "TIME NULL",
+        'num_pasajeros' => "INT NULL",
+        'estado' => "VARCHAR(100) NULL", // CORRECCIÓN: Aumentado
+        'created_at' => "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+    ];
 
-foreach ($expectedCols as $col => $definition) {
-    if (!in_array(strtolower($col), $existing)) {
-        $sql = "ALTER TABLE transfer_reservas ADD COLUMN {$col} {$definition}";
-        try {
-            $pdo->exec($sql);
-            echo "Added missing column {$col}." . PHP_EOL;
-        } catch (Exception $e) {
-            echo "Warning: could not add column {$col}: " . $e->getMessage() . PHP_EOL;
+    try {
+        $colStmt = $pdo->prepare("SELECT COLUMN_NAME FROM information_schema.columns WHERE table_schema = :db AND table_name = 'transfer_reservas'");
+        $colStmt->execute([':db' => $dbName]);
+        $existing = $colStmt->fetchAll(PDO::FETCH_COLUMN);
+        $existing = array_map('strtolower', $existing);
+
+        foreach ($expectedCols as $col => $definition) {
+            if (!in_array(strtolower($col), $existing)) {
+                if (strtolower($col) !== 'id_reserva') {
+                    $sql = "ALTER TABLE transfer_reservas ADD COLUMN {$col} {$definition}";
+                    $pdo->exec($sql);
+                    echo "✅ Columna faltante agregada: `{$col}`." . PHP_EOL;
+                }
+            }
         }
+    } catch (Exception $e) {
+        echo "❌ Error al verificar/agregar columnas: " . $e->getMessage() . PHP_EOL;
     }
 }
 
+
+// 3️⃣ Crear tabla de marcador de seeder y verificar si ya se aplicó
 $markerKey = 'seed_transfer_reservas_v1';
 $markerTable = 'seeder_marker';
+$markerExists = false;
 
-$pdo->exec("CREATE TABLE IF NOT EXISTS {$markerTable} (
-    marker VARCHAR(255) PRIMARY KEY,
-    applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+try {
+    $pdo->exec("CREATE TABLE IF NOT EXISTS {$markerTable} (
+        marker VARCHAR(255) PRIMARY KEY,
+        applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+    echo "✅ Tabla `seeder_marker` verificada." . PHP_EOL;
 
-$checkStmt = $pdo->prepare("SELECT 1 FROM {$markerTable} WHERE marker = :marker LIMIT 1");
-$checkStmt->execute([':marker' => $markerKey]);
-$markerExists = (bool) $checkStmt->fetchColumn();
+    $checkStmt = $pdo->prepare("SELECT 1 FROM {$markerTable} WHERE marker = :marker LIMIT 1");
+    $checkStmt->execute([':marker' => $markerKey]);
+    $markerExists = (bool) $checkStmt->fetchColumn();
+
+} catch (Exception $e) {
+    echo "❌ Error en la tabla de marcadores: " . $e->getMessage() . PHP_EOL;
+    // Si falla la tabla de marcadores, asumimos que no hay marcador
+}
 
 if ($markerExists) {
-    echo "Seeder already applied (marker found). Exiting." . PHP_EOL;
+    echo "ℹ️ Seeder ya aplicado (marcador encontrado: `{$markerKey}`). Saliendo..." . PHP_EOL;
     exit(0);
 }
 
+// 4️⃣ y 5️⃣ Datos de ejemplo e inserción
+echo "📚 Insertando datos de ejemplo en `transfer_reservas`..." . PHP_EOL;
 
+// Los datos de ejemplo son los mismos, pero al tener el campo 'estado' más grande,
+// MySQL no generará el Warning 1265.
 $sample = [
     [
         'localizador' => 'LOC001',
@@ -113,7 +155,7 @@ $sample = [
         'hora_entrada' => '15:00:00',
         'numero_vuelo_entrada' => 'IB123',
         'origen_vuelo_entrada' => 'MAD',
-        'fecha_vuelo_salida' => date('Y-m-d', strtotime('+6 days')),
+        'fecha_vuelo_salida' => date('Y-m-d', strtotime('+6 days')), 
         'num_viajeros' => 2,
         'id_vehiculo' => 1,
         'id_viajero' => 1,
@@ -279,49 +321,46 @@ $sample = [
     ],
 ];
 
-$insertSql = "INSERT INTO transfer_reservas (localizador,id_hotel,id_tipo_reserva,email_cliente,fecha_reserva,fecha_modificacion,id_destino,fecha_entrada,hora_entrada,numero_vuelo_entrada,origen_vuelo_entrada,fecha_vuelo_salida,num_viajeros,id_vehiculo,id_viajero,id_transfer,fecha_partida,hora_partida,num_pasajeros,estado) VALUES (:localizador,:id_hotel,:id_tipo_reserva,:email_cliente,:fecha_reserva,:fecha_modificacion,:id_destino,:fecha_entrada,:hora_entrada,:numero_vuelo_entrada,:origen_vuelo_entrada,:fecha_vuelo_salida,:num_viajeros,:id_vehiculo,:id_viajero,:id_transfer,:fecha_partida,:hora_partida,:num_pasajeros,:estado)";
-$insertStmt = $pdo->prepare($insertSql);
+$insertSql = "INSERT INTO transfer_reservas (
+    localizador,id_hotel,id_tipo_reserva,email_cliente,fecha_reserva,fecha_modificacion,
+    id_destino,fecha_entrada,hora_entrada,numero_vuelo_entrada,origen_vuelo_entrada,
+    fecha_vuelo_salida,num_viajeros,id_vehiculo,id_viajero,id_transfer,fecha_partida,
+    hora_partida,num_pasajeros,estado
+) VALUES (
+    :localizador,:id_hotel,:id_tipo_reserva,:email_cliente,:fecha_reserva,:fecha_modificacion,
+    :id_destino,:fecha_entrada,:hora_entrada,:numero_vuelo_entrada,:origen_vuelo_entrada,
+    :fecha_vuelo_salida,:num_viajeros,:id_vehiculo,:id_viajero,:id_transfer,:fecha_partida,
+    :hora_partida,:num_pasajeros,:estado
+)";
 
+$insertStmt = $pdo->prepare($insertSql);
 $inserted = 0;
 
+// Desactivar temporalmente las FK (útil para seeder)
 $pdo->exec('SET FOREIGN_KEY_CHECKS = 0');
-try {
-    foreach ($sample as $idx => $row) {
-        try {
-            $insertStmt->execute([
-                ':localizador' => $row['localizador'],
-                ':id_hotel' => $row['id_hotel'],
-                ':id_tipo_reserva' => $row['id_tipo_reserva'],
-                ':email_cliente' => $row['email_cliente'],
-                ':fecha_reserva' => $row['fecha_reserva'],
-                ':fecha_modificacion' => $row['fecha_modificacion'],
-                ':id_destino' => $row['id_destino'],
-                ':fecha_entrada' => $row['fecha_entrada'],
-                ':hora_entrada' => $row['hora_entrada'],
-                ':numero_vuelo_entrada' => $row['numero_vuelo_entrada'],
-                ':origen_vuelo_entrada' => $row['origen_vuelo_entrada'],
-                ':fecha_vuelo_salida' => $row['fecha_vuelo_salida'],
-                ':num_viajeros' => $row['num_viajeros'],
-                ':id_vehiculo' => $row['id_vehiculo'],
-                ':id_viajero' => $row['id_viajero'],
-                ':id_transfer' => $row['id_transfer'],
-                ':fecha_partida' => $row['fecha_partida'],
-                ':hora_partida' => $row['hora_partida'],
-                ':num_pasajeros' => $row['num_pasajeros'],
-                ':estado' => $row['estado'],
-            ]);
-            $inserted++;
-        } catch (Exception $e) {
-            echo "Error inserting row $idx: " . $e->getMessage() . PHP_EOL;
-            var_dump($row);
-        }
+
+foreach ($sample as $idx => $row) {
+    try {
+        $insertStmt->execute($row);
+        $inserted++;
+    } catch (Exception $e) {
+        // En CLI, solo mostramos el error y continuamos
+        echo "❌ Error al insertar fila {$idx} (Localizador: {$row['localizador']}): " . $e->getMessage() . PHP_EOL;
     }
-} finally {
-    $pdo->exec('SET FOREIGN_KEY_CHECKS = 1');
 }
 
-$pdo->exec("CREATE TABLE IF NOT EXISTS {$markerTable} (marker VARCHAR(255) PRIMARY KEY, applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
-$pdo->prepare("INSERT IGNORE INTO {$markerTable} (marker) VALUES (:marker)")->execute([':marker' => $markerKey]);
+$pdo->exec('SET FOREIGN_KEY_CHECKS = 1');
 
-echo "Inserted {$inserted} sample rows into transfer_reservas." . PHP_EOL;
+// 6️⃣ Marcar el seeder como aplicado
+try {
+    $pdo->prepare("INSERT IGNORE INTO {$markerTable} (marker) VALUES (:marker)")
+        ->execute([':marker' => $markerKey]);
+    
+    echo "✅ Se insertaron {$inserted} filas de ejemplo en `transfer_reservas`." . PHP_EOL;
+    echo "✅ Marcador (`{$markerKey}`) aplicado correctamente. El seeder no se ejecutará de nuevo." . PHP_EOL;
+} catch (Exception $e) {
+    echo "❌ Error al marcar el seeder: " . $e->getMessage() . PHP_EOL;
+}
+
+// Terminación exitosa para la CLI
 exit(0);
