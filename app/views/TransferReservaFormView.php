@@ -35,7 +35,7 @@ $currentUser = Auth::getCurrentUser();
             align-items: center;
             border-radius: 8px;
             margin-bottom: 30px;
-            max-width: 1200px;
+            max-width: 800px; /* Reducido para el formulario */
             margin-left: auto;
             margin-right: auto;
         }
@@ -222,8 +222,8 @@ $currentUser = Auth::getCurrentUser();
                                 value="<?= htmlspecialchars($vehiculo['id'] ?? $vehiculo->id) ?>" 
                                 <?= ($vehiculo_actual_id == ($vehiculo['id'] ?? $vehiculo->id)) ? 'selected' : '' ?>
                             >
-                                <!-- Asumimos que quieres mostrar el nombre o la matrícula del vehículo -->
-                                <?= htmlspecialchars($vehiculo['nombre'] ?? $vehiculo->matricula) ?> 
+                                <!-- Muestra la descripción del vehículo -->
+                                <?= htmlspecialchars($vehiculo['Descripción'] ?? $vehiculo->Descripción ?? 'Vehículo sin descripción') ?> 
                             </option>
                         <?php endforeach; ?>
                     </select>

@@ -112,6 +112,7 @@
         .alert-success { background-color: #d4edda; color: #155724; }
         .alert-error { background-color: #f8d7da; color: #721c24; }
     </style>
+
 </head>
 <body>
     <div class="navbar">
@@ -165,7 +166,7 @@
                                 <td><?= htmlspecialchars($reserva['email_cliente'] ?? 'N/A') ?></td>
                                 <td><?= htmlspecialchars($reserva['estado'] ?? 'N/A') ?></td>
                                 <td class="actions">
-                                    <a href="?action=view&id=<?= $reserva['id_reserva'] ?>" class="view" title="Ver Detalles">👁️</a>
+                                    <a href="?action=show&id=<?= $reserva['id_reserva'] ?>" class="view" title="Ver Detalles">👁️</a>
                                     <a href="?action=edit&id=<?= $reserva['id_reserva'] ?>"class="edit" title="Editar">✏️</a>
                                     <a href="?action=delete&id=<?= $reserva['id_reserva'] ?>" class="delete" onclick="return confirm('¿Estás seguro de que quieres eliminar esta reserva?');">🗑️</a>
                                 </td>

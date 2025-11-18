@@ -10,9 +10,9 @@ class Auth {
     /**
      * Register a hotel
      */
-    public function registerHotel($usuario, $password, $id_zona = null) {
-        if (empty($usuario) || empty($password)) {
-            return ['success' => false, 'message' => 'Usuario y contraseña son requeridos'];
+    public function registerHotel($nombre, $usuario, $password, $id_zona = null) {
+        if (empty($nombre) || empty($usuario) || empty($password)) {
+            return ['success' => false, 'message' => 'Nombre, usuario y contraseña son requeridos'];
         }
 
         // Check if usuario already exists
@@ -24,9 +24,10 @@ class Auth {
 
         try {
             $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
-            $stmt = $this->pdo->prepare('INSERT INTO tranfer_hotel (usuario, password, id_zona) VALUES (:usuario, :password, :id_zona)');
+            $stmt = $this->pdo->prepare('INSERT INTO tranfer_hotel (nombre, usuario, password, id_zona) VALUES (:nombre, :usuario, :password, :id_zona)');
             $result = $stmt->execute([
                 ':usuario' => $usuario,
+                ':nombre' => $nombre,
                 ':password' => $hashedPassword,
                 ':id_zona' => $id_zona
             ]);
