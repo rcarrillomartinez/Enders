@@ -91,7 +91,12 @@
             font-weight: 600;
             margin-right: 15px;
         }
+        .actions a.view { color: #3b82f6; } 
+        .actions a.edit { color: #facc15; } 
         .actions a.delete { color: #ff6b6b; }
+        .actions a:hover {
+            opacity: 0.8;
+        }
         .empty-state {
             text-align: center;
             padding: 50px;
@@ -160,8 +165,9 @@
                                 <td><?= htmlspecialchars($reserva['email_cliente'] ?? 'N/A') ?></td>
                                 <td><?= htmlspecialchars($reserva['estado'] ?? 'N/A') ?></td>
                                 <td class="actions">
-                                    <a href="?action=edit&id=<?= $reserva['id_reserva'] ?>">Editar</a>
-                                    <a href="?action=delete&id=<?= $reserva['id_reserva'] ?>" class="delete" onclick="return confirm('¿Estás seguro de que quieres eliminar esta reserva?');">Eliminar</a>
+                                    <a href="?action=view&id=<?= $reserva['id_reserva'] ?>" class="view" title="Ver Detalles">👁️</a>
+                                    <a href="?action=edit&id=<?= $reserva['id_reserva'] ?>"class="edit" title="Editar">✏️</a>
+                                    <a href="?action=delete&id=<?= $reserva['id_reserva'] ?>" class="delete" onclick="return confirm('¿Estás seguro de que quieres eliminar esta reserva?');">🗑️</a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
