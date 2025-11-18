@@ -204,10 +204,10 @@ $currentUser = Auth::getCurrentUser();
                         <option value="" disabled <?= $hotel_actual_id === '' ? 'selected' : '' ?>>-- Selecciona un Hotel --</option>
                         <?php foreach ($hoteles as $hotel): ?>
                             <option 
-                                value="<?= htmlspecialchars($hotel['id'] ?? $hotel->id) ?>" 
-                                <?= ($hotel_actual_id == ($hotel['id'] ?? $hotel->id)) ? 'selected' : '' ?>
+                                value="<?= htmlspecialchars($hotel['id_hotel']) ?>" 
+                                <?= ($hotel_actual_id == $hotel['id_hotel']) ? 'selected' : '' ?>
                             >
-                                <?= htmlspecialchars($hotel['nombre'] ?? $hotel->nombre) ?>
+                                <?= htmlspecialchars($hotel['nombre_hotel']) ?> <!-- Asumiendo que 'usuario' es el nombre a mostrar -->
                             </option>
                         <?php endforeach; ?>
                     </select>
@@ -219,11 +219,11 @@ $currentUser = Auth::getCurrentUser();
                         <option value="" disabled <?= $vehiculo_actual_id === '' ? 'selected' : '' ?>>-- Selecciona un Vehículo --</option>
                         <?php foreach ($vehiculos as $vehiculo): ?>
                             <option 
-                                value="<?= htmlspecialchars($vehiculo['id'] ?? $vehiculo->id) ?>" 
-                                <?= ($vehiculo_actual_id == ($vehiculo['id'] ?? $vehiculo->id)) ? 'selected' : '' ?>
+                                value="<?= htmlspecialchars($vehiculo['id_vehiculo']) ?>" 
+                                <?= ($vehiculo_actual_id == $vehiculo['id_vehiculo']) ? 'selected' : '' ?>
                             >
                                 <!-- Muestra la descripción del vehículo -->
-                                <?= htmlspecialchars($vehiculo['Descripción'] ?? $vehiculo->Descripción ?? 'Vehículo sin descripción') ?> 
+                                <?= htmlspecialchars($vehiculo['descripcion'] ?? $vehiculo->descripcion ?? 'Vehículo sin descripción') ?> 
                             </option>
                         <?php endforeach; ?>
                     </select>

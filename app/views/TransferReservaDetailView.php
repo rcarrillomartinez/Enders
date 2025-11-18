@@ -143,7 +143,7 @@ $reserva = $reserva ?? [];
             <div class="detail-card">
                 <h3>🏨 Salida (Hotel → Aeropuerto)</h3>
                 <div class="detail-item"><strong>Fecha de Salida:</strong> <span><?= htmlspecialchars(isset($reserva['fecha_vuelo_salida']) ? (new DateTime($reserva['fecha_vuelo_salida']))->format('d/m/Y') : 'N/A') ?></span></div>
-                <div class="detail-item"><strong>Hora Recogida:</strong> <span><?= htmlspecialchars(isset($reserva['hora_recogida']) ? (new DateTime($reserva['hora_recogida']))->format('H:i') : 'N/A') ?></span></div>
+                <div class="detail-item"><strong>Hora Partida:</strong> <span><?= htmlspecialchars(isset($reserva['hora_partida']) ? (new DateTime($reserva['hora_partida']))->format('H:i') : 'N/A') ?></span></div>
             </div>
             <?php endif; ?>
         </div>

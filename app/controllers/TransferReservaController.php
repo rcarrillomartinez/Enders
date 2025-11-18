@@ -27,7 +27,6 @@ class TransferReservaController {
             $user = Auth::getCurrentUser();
             $filterByEmail = null;
             
-            // If not admin, filter by user email
             if ($user['user_type'] !== 'admin') {
                 $filterByEmail = $user['user_email'];
             }
@@ -49,7 +48,6 @@ class TransferReservaController {
      * @param int $id
      */
     public function show($id) {
-        // Check if user is logged in
         if (!Auth::isLoggedIn()) {
             header('Location: ?action=auth');
             exit();
@@ -66,7 +64,6 @@ class TransferReservaController {
                 return;
             }
 
-            // Check if user has access to this reservation
             $user = Auth::getCurrentUser();
             if ($user['user_type'] !== 'admin' && $reserva['email_cliente'] !== $user['user_email']) {
                 echo '<div style="color: red; padding: 20px;">';
@@ -90,7 +87,17 @@ class TransferReservaController {
             header('Location: ?action=auth');
             exit();
         }
-        // Reusing TransferReservaFormView for creation
+
+        $hoteles = $this->model->getRelatedData('tranfer_hotel');
+        $vehiculos = $this->model->getRelatedData('transfer_vehiculo');
+
+        $data = [
+            'hoteles' => $hoteles,
+            'vehiculos' => $vehiculos,
+        ];
+        $errors = [];
+        $formAction = '?action=store';
+
         include __DIR__ . '/../views/TransferReservaFormView.php';
     }
 
@@ -116,13 +123,29 @@ class TransferReservaController {
             header('Location: ?action=auth');
             exit();
         }
-        $reserva = $this->model->getById($id);
-        if (!$reserva) {
-            header('Location: ?action=gestion_reservas&status=notfound');
+        try {
+            $reserva = $this->model->getById($id);
+            if (!$reserva) {
+                header('Location: ?action=gestion_reservas&status=notfound');
+                exit();
+            }
+
+            $user = Auth::getCurrentUser();
+            if ($user['user_type'] !== 'admin' && $reserva['email_cliente'] !== $user['user_email']) {
+                header('Location: ?action=gestion_reservas&status=unauthorized');
+                exit();
+            }
+
+            $data = $reserva;
+            $data['hoteles'] = $this->model->getRelatedData('tranfer_hotel');
+            $data['vehiculos'] = $this->model->getRelatedData('transfer_vehiculo');
+            $errors = [];
+            $formAction = '?action=update';
+            include __DIR__ . '/../views/TransferReservaFormView.php';
+        } catch (Exception $e) {
+            header('Location: ?action=gestion_reservas&status=error');
             exit();
         }
-        $data = $reserva; // Populate form with existing data
-        include __DIR__ . '/../views/TransferReservaFormView.php';
     }
 
     public function update() {
@@ -135,6 +158,14 @@ class TransferReservaController {
             if (!$id) {
                 throw new Exception("ID de reserva no proporcionado.");
             }
+
+            // Authorization check before update
+            $reserva = $this->model->getById($id);
+            $user = Auth::getCurrentUser();
+            if ($user['user_type'] !== 'admin' && $reserva['email_cliente'] !== $user['user_email']) {
+                throw new Exception("No tiene permiso para modificar esta reserva.");
+            }
+
             $this->model->update($id, $_POST);
             header('Location: ?action=gestion_reservas&status=updated');
             exit();
@@ -152,14 +183,19 @@ class TransferReservaController {
             exit();
         }
         try {
+            $reserva = $this->model->getById($id);
+            $user = Auth::getCurrentUser();
+            if ($user['user_type'] !== 'admin' && $reserva['email_cliente'] !== $user['user_email']) {
+                header('Location: ?action=gestion_reservas&status=unauthorized');
+                exit();
+            }
+
             $this->model->delete($id);
             header('Location: ?action=gestion_reservas&status=deleted');
             exit();
         } catch (Exception $e) {
-            echo '<div style="color: red; padding: 20px;">';
-            echo '<h2>Error</h2>';
-            echo '<p>' . htmlspecialchars($e->getMessage()) . '</p>';
-            echo '</div>';
+            header('Location: ?action=gestion_reservas&status=error&msg=' . urlencode($e->getMessage()));
+            exit();
         }
     }
 
