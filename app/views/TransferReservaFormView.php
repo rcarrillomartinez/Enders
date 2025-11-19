@@ -4,9 +4,9 @@ require_once __DIR__ . '/../models/Auth.php';
 
 // Determina si el formulario es para editar una reserva existente o crear una nueva.
 $isEdit = isset($data['id_reserva']);
-$title = $isEdit ? 'Modificar Reserva ' . htmlspecialchars($reserva['localizador']) : 'Crear Nueva Reserva';
+$title = $isEdit ? 'Modificar Reserva ' . htmlspecialchars($data['localizador']) : 'Crear Nueva Reserva';
 $data = $data ?? [];
-$tipo_reserva_actual = $data['tipo_reserva'] ?? ''; 
+$tipo_reserva_actual = $data['id_tipo_reserva'] ?? ''; 
 $vehiculos = $data['vehiculos'] ?? []; // Inicializa la lista de vehículos.
 $vehiculo_actual_id = $data['id_vehiculo'] ?? '';
 $hoteles = $data['hoteles'] ?? [];
@@ -180,19 +180,19 @@ $currentUser = Auth::getCurrentUser();
                     <h3>Detalles de Llegada (Aeropuerto → Hotel)</h3>
                         <div class="form-group">
                             <label>Día de llegada:</label>
-                            <input type="date" name="fecha_llegada" value="<?= htmlspecialchars($data['fecha_llegada'] ?? '') ?>">
+                            <input type="date" name="fecha_llegada" value="<?= htmlspecialchars($data['fecha_entrada'] ?? '') ?>">
                         </div>
                         <div class="form-group">
                             <label>Hora de llegada:</label>
-                            <input type="time" name="hora_llegada" value="<?= htmlspecialchars($data['hora_llegada'] ?? '') ?>">
+                            <input type="time" name="hora_llegada" value="<?= htmlspecialchars($data['hora_entrada'] ?? '') ?>">
                         </div>
                         <div class="form-group">
                             <label>Número de vuelo:</label>
-                            <input type="text" name="vuelo_llegada" value="<?= htmlspecialchars($data['vuelo_llegada'] ?? '') ?>">
+                            <input type="text" name="vuelo_llegada" value="<?= htmlspecialchars($data['numero_vuelo_entrada'] ?? '') ?>">
                         </div>
                         <div class="form-group">
                             <label>Aeropuerto de origen:</label>
-                            <input type="text" name="origen_llegada" value="<?= htmlspecialchars($data['origen_llegada'] ?? '') ?>">
+                            <input type="text" name="origen_llegada" value="<?= htmlspecialchars($data['origen_vuelo_entrada'] ?? '') ?>">
                         </div>
                 </div>
 
@@ -201,11 +201,11 @@ $currentUser = Auth::getCurrentUser();
                     <h3>Detalles de Salida (Hotel → Aeropuerto)</h3>
                         <div class="form-group">
                             <label>Día del vuelo:</label>
-                            <input type="date" name="fecha_salida" value="<?= htmlspecialchars($data['fecha_salida'] ?? '') ?>">
+                            <input type="date" name="fecha_salida" value="<?= htmlspecialchars($data['fecha_vuelo_salida'] ?? '') ?>">
                         </div>
                         <div class="form-group">
                             <label>Hora del vuelo:</label>
-                            <input type="time" name="hora_salida" value="<?= htmlspecialchars($data['hora_salida'] ?? '') ?>">
+                            <input type="time" name="hora_salida" value="<?= htmlspecialchars($data['hora_partida'] ?? '') ?>">
                         </div>
                 </div>
                 
@@ -256,15 +256,15 @@ $currentUser = Auth::getCurrentUser();
                 <h3>Datos del cliente</h3>
                 <div class="form-group">
                     <label>Nombre:</label>
-                    <input type="text" name="nombre_cliente" value="<?= htmlspecialchars($data['nombre_cliente'] ?? $currentUser['nombre'] ?? '') ?>" required>
+                    <input type="text" name="nombre_cliente" value="<?= htmlspecialchars($data['nombre_cliente'] ?? ($currentUser['user_type'] === 'viajero' ? ($data['nombre'] ?? '') : '')) ?>" required>
                 </div>
                 <div class="form-group">
                     <label>Apellido 1:</label>
-                    <input type="text" name="apellido1_cliente" value="<?= htmlspecialchars($data['apellido1_cliente'] ?? $currentUser['apellido1'] ?? '') ?>" required>
+                    <input type="text" name="apellido1_cliente" value="<?= htmlspecialchars($data['apellido1_cliente'] ?? ($currentUser['user_type'] === 'viajero' ? ($data['apellido1'] ?? '') : '')) ?>" required>
                 </div>
                 <div class="form-group">
                     <label>Apellido 2:</label>
-                    <input type="text" name="apellido2_cliente" value="<?= htmlspecialchars($data['apellido2_cliente'] ?? $currentUser['apellido2'] ?? '') ?>">
+                    <input type="text" name="apellido2_cliente" value="<?= htmlspecialchars($data['apellido2_cliente'] ?? ($currentUser['user_type'] === 'viajero' ? ($data['apellido2'] ?? '') : '')) ?>">
                 </div>
                 <div class="form-group">
                     <label>Email:</label>

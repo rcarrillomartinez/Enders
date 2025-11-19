@@ -167,10 +167,9 @@
                     <thead>
                         <tr>
                             <th>Localizador</th>
-                            <th>Fecha Entrada</th>
-                            <th>Hora</th>
+                            <th>Fecha Reserva</th>
                             <th>Pasajeros</th>
-                            <th>Cliente</th>
+                            <th>Tipo</th>
                             <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
@@ -179,11 +178,18 @@
                         <?php foreach ($reservas as $reserva): ?>
                             <!-- Fila para cada reserva -->
                             <tr>
+                                <?php
+                                    $tipoReservaLabels = [
+                                        '1' => 'Llegada',
+                                        '2' => 'Salida',
+                                        '3' => 'Ida y Vuelta'
+                                    ];
+                                    $tipoReserva = $reserva['id_tipo_reserva'] ?? null;
+                                ?>
                                 <td><?= htmlspecialchars($reserva['localizador'] ?? 'N/A') ?></td>
-                                <td><?= htmlspecialchars($reserva['fecha_entrada'] ?? 'N/A') ?></td>
-                                <td><?= htmlspecialchars($reserva['hora_entrada'] ?? 'N/A') ?></td>
+                                <td><?= htmlspecialchars(isset($reserva['fecha_reserva']) ? (new DateTime($reserva['fecha_reserva']))->format('d/m/Y') : 'N/A') ?></td>
                                 <td><?= htmlspecialchars($reserva['num_viajeros'] ?? 'N/A') ?></td>
-                                <td><?= htmlspecialchars($reserva['email_cliente'] ?? 'N/A') ?></td>
+                                <td><?= htmlspecialchars($tipoReservaLabels[$tipoReserva] ?? 'No especificado') ?></td>
                                 <td><?= htmlspecialchars($reserva['estado'] ?? 'N/A') ?></td>
                                 <td class="actions">
                                     <!-- Enlaces de acción (ver, editar, eliminar) para cada reserva -->

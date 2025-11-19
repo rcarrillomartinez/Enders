@@ -372,14 +372,21 @@
                 // Formato de la fecha actual para comparación.
                 $todayStr = $today->format('Y-m-d');
 
-                // Organizar las reservas por fecha_entrada
+                // Organizar las reservas por fecha para el calendario
                 $reservasByDate = [];
                 foreach ($reservas as $reserva) {
-                    $fecha = $reserva['fecha_entrada'] ?? null;
-                    if ($fecha) {
+                    // Para llegadas e ida/vuelta, usar fecha_entrada
+                    if (in_array($reserva['id_tipo_reserva'], ['1', '3']) && !empty($reserva['fecha_entrada'])) {
+                        $fecha = $reserva['fecha_entrada'];
                         if (!isset($reservasByDate[$fecha])) {
                             $reservasByDate[$fecha] = [];
                         }
+                        $reservasByDate[$fecha][] = $reserva;
+                    }
+                    // Para salidas e ida/vuelta, usar fecha_vuelo_salida
+                    if (in_array($reserva['id_tipo_reserva'], ['2', '3']) && !empty($reserva['fecha_vuelo_salida'])) {
+                        $fecha = $reserva['fecha_vuelo_salida'];
+                        if (!isset($reservasByDate[$fecha])) { $reservasByDate[$fecha] = []; }
                         $reservasByDate[$fecha][] = $reserva;
                     }
                 }
@@ -594,24 +601,50 @@
             // Parsea los datos de la reserva desde el atributo 'data-reserva'
             const reservaJson = item.getAttribute('data-reserva');
             const reserva = JSON.parse(reservaJson);
+
+            function formatField(label, value) {
+                return `<p><strong>${label}:</strong> <span>${value || 'N/A'}</span></p>`;
+            }
+
+            function formatDate(dateStr) {
+                if (!dateStr) return 'N/A';
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('es-ES');
+            }
+
+            function formatTime(timeStr) {
+                if (!timeStr) return 'N/A';
+                return timeStr.substring(0, 5);
+            }
             
             let html = '';
-            // Campos a excluir de la visualización en el modal
-            const excludeFields = ['id_reserva', 'id_hotel', 'id_tipo_reserva', 'id_destino', 'id_vehiculo', 'id_viajero', 'id_transfer'];
-            
-            for (const [key, value] of Object.entries(reserva)) {
-                if (excludeFields.includes(key) || key.toLowerCase().includes('id')) continue;
-                
-                const label = key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
-                
-                if (key === 'estado') {
-                    // Formato especial para el estado de la reserva
-                    html += '<p><strong>' + label + ':</strong> <span class="status-badge ' + value + '">' + value + '</span></p>';
-                } else {
-                    // Formato general para otros campos
-                    html += '<p><strong>' + label + ':</strong> ' + (value || 'N/A') + '</p>';
-                }
+
+            // Información General
+            html += '<h3>ℹ️ Información General</h3>';
+            html += formatField('Localizador', reserva.localizador);
+            html += `<p><strong>Estado:</strong> <span class="status-badge ${reserva.estado}">${reserva.estado}</span></p>`;
+            html += formatField('Pasajeros', reserva.num_viajeros);
+
+            // Datos del Cliente
+            html += '<h3>👤 Datos del Cliente</h3>';
+            html += formatField('Nombre', reserva.nombre_cliente);
+            html += formatField('Email', reserva.email_cliente);
+
+            // Detalles de Llegada
+            if (reserva.id_tipo_reserva == '1' || reserva.id_tipo_reserva == '3') {
+                html += '<h3>✈️ Llegada (Aeropuerto → Hotel)</h3>';
+                html += formatField('Fecha Llegada', formatDate(reserva.fecha_entrada));
+                html += formatField('Hora Llegada', formatTime(reserva.hora_entrada));
+                html += formatField('Nº Vuelo', reserva.numero_vuelo_entrada);
             }
+
+            // Detalles de Salida
+            if (reserva.id_tipo_reserva == '2' || reserva.id_tipo_reserva == '3') {
+                html += '<h3>🏨 Salida (Hotel → Aeropuerto)</h3>';
+                html += formatField('Fecha Salida', formatDate(reserva.fecha_vuelo_salida));
+                html += formatField('Hora Partida', formatTime(reserva.hora_partida));
+            }
+
             // Inserta el HTML generado en el cuerpo del modal y lo muestra
             document.getElementById('modalBody').innerHTML = html;
             document.getElementById('reservaModal').style.display = 'block';
