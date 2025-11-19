@@ -1,5 +1,6 @@
 <?php
 $reserva = $reserva ?? [];
+// Vista para mostrar los detalles de una reserva específica.
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -7,10 +8,12 @@ $reserva = $reserva ?? [];
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalles de Reserva: <?= htmlspecialchars($reserva['localizador'] ?? 'N/A') ?></title>
+    <!-- Estilos CSS para la página de detalles de reserva -->
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            /* Fondo degradado para la página */
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
@@ -29,6 +32,7 @@ $reserva = $reserva ?? [];
             margin-right: auto;
         }
         .navbar h2 { color: #333; font-size: 1.5em; }
+        /* Enlace de navegación */
         .navbar-links a { color: #667eea; text-decoration: none; font-weight: 600; }
         .container {
             background: white;
@@ -47,6 +51,7 @@ $reserva = $reserva ?? [];
             border-bottom: 2px solid #e0e0e0;
             padding-bottom: 20px;
         }
+        /* Título principal de la página */
         h1 { color: #333; font-size: 2em; }
         .btn-back {
             background-color: #f1f3f5;
@@ -58,6 +63,7 @@ $reserva = $reserva ?? [];
             font-weight: 600;
             transition: background-color 0.3s;
         }
+        /* Efecto hover para el botón de volver */
         .btn-back:hover { background-color: #e0e0e0; }
         .details-grid {
             display: grid;
@@ -70,6 +76,7 @@ $reserva = $reserva ?? [];
             border-radius: 8px;
             border-left: 4px solid #667eea;
         }
+        /* Título de las tarjetas de detalle */
         .detail-card h3 {
             color: #667eea;
             margin-bottom: 15px;
@@ -82,7 +89,9 @@ $reserva = $reserva ?? [];
             border-bottom: 1px solid #e9ecef;
             font-size: 0.95em;
         }
+        /* Eliminar borde inferior del último elemento de detalle */
         .detail-item:last-child { border-bottom: none; }
+        /* Estilos para el texto fuerte y el valor del detalle */
         .detail-item strong { color: #333; }
         .detail-item span { color: #555; text-align: right; }
         .status-badge {
@@ -93,6 +102,7 @@ $reserva = $reserva ?? [];
             font-size: 0.9em;
             color: white;
         }
+        /* Estilos para los diferentes estados de la reserva */
         .status-badge.confirmada { background: linear-gradient(135deg, #52c41a 0%, #389e0d 100%); }
         .status-badge.completada { background: linear-gradient(135deg, #1890ff 0%, #0050b3 100%); }
         .status-badge.pendiente { background: linear-gradient(135deg, #faad14 0%, #d48806 100%); }
@@ -101,6 +111,7 @@ $reserva = $reserva ?? [];
 </head>
 <body>
     <div class="navbar">
+        <!-- Título de la barra de navegación -->
         <h2>🏝️ Transfer Reservas</h2>
         <div class="navbar-links">
             <a href="?action=gestion_reservas">← Volver a la gestión</a>
@@ -109,12 +120,14 @@ $reserva = $reserva ?? [];
 
     <div class="container">
         <div class="header-section">
+            <!-- Título de la sección de detalles -->
             <h1>Detalles de la Reserva</h1>
             <a href="?action=gestion_reservas" class="btn-back">← Volver</a>
         </div>
 
         <div class="details-grid">
             <div class="detail-card">
+                <!-- Información general de la reserva -->
                 <h3>ℹ️ Información General</h3>
                 <div class="detail-item"><strong>Localizador:</strong> <span><?= htmlspecialchars($reserva['localizador'] ?? 'N/A') ?></span></div>
                 <div class="detail-item"><strong>Estado:</strong> <span><span class="status-badge <?= strtolower($reserva['estado'] ?? '') ?>"><?= htmlspecialchars($reserva['estado'] ?? 'N/A') ?></span></span></div>
@@ -123,13 +136,15 @@ $reserva = $reserva ?? [];
             </div>
 
             <div class="detail-card">
+                <!-- Datos del cliente -->
                 <h3>👤 Datos del Cliente</h3>
                 <div class="detail-item"><strong>Nombre:</strong> <span><?= htmlspecialchars($reserva['nombre_cliente'] ?? 'N/A') ?></span></div>
                 <div class="detail-item"><strong>Email:</strong> <span><?= htmlspecialchars($reserva['email_cliente'] ?? 'N/A') ?></span></div>
-                <div class="detail-item"><strong>Pasajeros:</strong> <span><?= htmlspecialchars($reserva['num_pasajeros'] ?? $reserva['num_viajeros'] ?? 'N/A') ?></span></div>
+                <div class="detail-item"><strong>Pasajeros:</strong> <span><?= htmlspecialchars($reserva['num_viajeros'] ?? $reserva['num_viajeros'] ?? 'N/A') ?></span></div>
             </div>
 
             <?php if (!empty($reserva['numero_vuelo_entrada'])): ?>
+            <!-- Detalles de llegada (Aeropuerto -> Hotel) si existen -->
             <div class="detail-card">
                 <h3>✈️ Llegada (Aeropuerto → Hotel)</h3>
                 <div class="detail-item"><strong>Fecha de Llegada:</strong> <span><?= htmlspecialchars(isset($reserva['fecha_entrada']) ? (new DateTime($reserva['fecha_entrada']))->format('d/m/Y') : 'N/A') ?></span></div>
@@ -140,6 +155,7 @@ $reserva = $reserva ?? [];
             <?php endif; ?>
 
             <?php if (!empty($reserva['fecha_vuelo_salida'])): ?>
+            <!-- Detalles de salida (Hotel -> Aeropuerto) si existen -->
             <div class="detail-card">
                 <h3>🏨 Salida (Hotel → Aeropuerto)</h3>
                 <div class="detail-item"><strong>Fecha de Salida:</strong> <span><?= htmlspecialchars(isset($reserva['fecha_vuelo_salida']) ? (new DateTime($reserva['fecha_vuelo_salida']))->format('d/m/Y') : 'N/A') ?></span></div>

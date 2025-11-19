@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+<!-- Vista para la gestión de reservas, mostrando una tabla con todas las reservas. -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,10 +8,12 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
+            /* Estilos generales del cuerpo de la página */
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
+            /* Fondo degradado */
         }
         .navbar {
             background: white;
@@ -25,7 +28,9 @@
             margin-left: auto;
             margin-right: auto;
         }
+        /* Estilos para el título de la barra de navegación */
         .navbar h2 { color: #333; font-size: 1.5em; }
+        /* Estilos para los enlaces de la barra de navegación */
         .navbar-links { display: flex; gap: 20px; align-items: center; }
         .navbar-links a { color: #667eea; text-decoration: none; font-weight: 600; transition: color 0.3s; }
         .navbar-links a:hover { color: #764ba2; }
@@ -36,6 +41,7 @@
             border-radius: 6px;
             cursor: pointer;
         }
+        /* Contenedor principal de la página */
         .container {
             background: white;
             border-radius: 12px;
@@ -45,10 +51,12 @@
             padding: 40px;
             margin: 0 auto;
         }
+        /* Sección de encabezado con título y botón */
         .header-section {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            /* Alineación de elementos */
             margin-bottom: 30px;
         }
         h1 { color: #333; font-size: 2em; }
@@ -63,6 +71,7 @@
             cursor: pointer;
             text-decoration: none;
             transition: transform 0.2s, box-shadow 0.2s;
+            /* Efectos de transición para el botón */
         }
         .btn-primary:hover {
             transform: translateY(-2px);
@@ -70,6 +79,7 @@
         }
         .table-wrapper { overflow-x: auto; }
         table {
+            /* Estilos para la tabla de reservas */
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
@@ -79,10 +89,12 @@
             text-align: left;
             border-bottom: 1px solid #e0e0e0;
         }
+        /* Estilos para los encabezados de la tabla */
         th {
             background-color: #f8f9fa;
             font-weight: 600;
             color: #333;
+            /* Fondo y color de texto */
         }
         tr:hover { background-color: #f1f3f5; }
         .actions a {
@@ -91,10 +103,12 @@
             font-weight: 600;
             margin-right: 15px;
         }
+        /* Colores específicos para los botones de acción */
         .actions a.view { color: #3b82f6; } 
         .actions a.edit { color: #facc15; } 
         .actions a.delete { color: #ff6b6b; }
         .actions a:hover {
+            /* Efecto hover para los botones de acción */
             opacity: 0.8;
         }
         .empty-state {
@@ -103,12 +117,14 @@
             color: #666;
         }
         .alert {
+            /* Estilos generales para mensajes de alerta */
             padding: 15px;
             border-radius: 6px;
             margin-bottom: 20px;
             font-weight: 600;
             text-align: center;
         }
+        /* Colores específicos para alertas de éxito y error */
         .alert-success { background-color: #d4edda; color: #155724; }
         .alert-error { background-color: #f8d7da; color: #721c24; }
     </style>
@@ -126,6 +142,7 @@
 
     <div class="container">
         <div class="header-section">
+            <!-- Título de la sección y botón para crear nueva reserva -->
             <h1>📦 Gestión de Reservas</h1>
             <a href="?action=create" class="btn-primary">➕ Crear Nueva Reserva</a>
         </div>
@@ -138,10 +155,12 @@
             if ($status === 'notfound') echo '<div class="alert alert-error">Reserva no encontrada.</div>';
         ?>
 
+        <!-- Muestra un mensaje si no hay reservas, o la tabla de reservas si las hay -->
         <?php if (empty($reservas)): ?>
             <div class="empty-state">
                 <p>No se han encontrado reservas. ¡Crea la primera!</p>
             </div>
+        <!-- Tabla para mostrar las reservas -->
         <?php else: ?>
             <div class="table-wrapper">
                 <table>
@@ -158,14 +177,16 @@
                     </thead>
                     <tbody>
                         <?php foreach ($reservas as $reserva): ?>
+                            <!-- Fila para cada reserva -->
                             <tr>
                                 <td><?= htmlspecialchars($reserva['localizador'] ?? 'N/A') ?></td>
                                 <td><?= htmlspecialchars($reserva['fecha_entrada'] ?? 'N/A') ?></td>
                                 <td><?= htmlspecialchars($reserva['hora_entrada'] ?? 'N/A') ?></td>
-                                <td><?= htmlspecialchars($reserva['num_pasajeros'] ?? 'N/A') ?></td>
+                                <td><?= htmlspecialchars($reserva['num_viajeros'] ?? 'N/A') ?></td>
                                 <td><?= htmlspecialchars($reserva['email_cliente'] ?? 'N/A') ?></td>
                                 <td><?= htmlspecialchars($reserva['estado'] ?? 'N/A') ?></td>
                                 <td class="actions">
+                                    <!-- Enlaces de acción (ver, editar, eliminar) para cada reserva -->
                                     <a href="?action=show&id=<?= $reserva['id_reserva'] ?>" class="view" title="Ver Detalles">👁️</a>
                                     <a href="?action=edit&id=<?= $reserva['id_reserva'] ?>"class="edit" title="Editar">✏️</a>
                                     <a href="?action=delete&id=<?= $reserva['id_reserva'] ?>" class="delete" onclick="return confirm('¿Estás seguro de que quieres eliminar esta reserva?');">🗑️</a>

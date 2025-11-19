@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+<!-- Vista para la autenticación de usuarios (inicio de sesión y registro). -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,6 +11,7 @@
             padding: 0;
             box-sizing: border-box;
         }
+        /* Estilos generales del cuerpo de la página */
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -21,6 +23,7 @@
             padding: 20px;
         }
 
+        /* Contenedor principal del formulario de autenticación */
         .container {
             background: white;
             border-radius: 12px;
@@ -30,20 +33,21 @@
             padding: 40px;
         }
 
+        /* Título principal de la página */
         h1 {
             color: #333;
             margin-bottom: 10px;
             text-align: center;
             font-size: 2em;
         }
-
+        /* Subtítulo descriptivo */
         .subtitle {
             text-align: center;
             color: #666;
             margin-bottom: 30px;
             font-size: 0.95em;
         }
-
+        /* Contenedor para los botones de pestañas */
         .tabs {
             display: flex;
             gap: 10px;
@@ -51,6 +55,7 @@
         }
 
         .tab-btn {
+            /* Estilos para los botones de pestañas */
             flex: 1;
             padding: 12px;
             border: 2px solid #e0e0e0;
@@ -60,18 +65,21 @@
             font-weight: 600;
             transition: all 0.3s;
             color: #666;
+            /* Transición suave para todos los cambios */
         }
 
         .tab-btn.active {
+            /* Estilos para el botón de pestaña activo */
             border-color: #667eea;
             background: #667eea;
             color: white;
         }
 
         .tab-btn:hover {
+            /* Efecto hover para los botones de pestañas */
             border-color: #667eea;
         }
-
+        /* Contenedor para los botones de tipo de usuario */
         .user-type-tabs {
             display: flex;
             gap: 10px;
@@ -80,6 +88,7 @@
         }
 
         .user-type-btn {
+            /* Estilos para los botones de selección de tipo de usuario */
             flex: 1;
             min-width: 100px;
             padding: 10px;
@@ -92,17 +101,17 @@
             color: #666;
             font-size: 0.9em;
         }
-
+        /* Estilos para el botón de tipo de usuario activo */
         .user-type-btn.active {
             border-color: #667eea;
             background: #667eea;
             color: white;
         }
-
+        /* Grupo de formulario */
         .form-group {
             margin-bottom: 20px;
         }
-
+        /* Etiquetas de formulario */
         label {
             display: block;
             margin-bottom: 8px;
@@ -110,7 +119,7 @@
             font-weight: 600;
             font-size: 0.95em;
         }
-
+        /* Estilos para campos de entrada y select */
         input[type="text"],
         input[type="email"],
         input[type="password"],
@@ -123,8 +132,9 @@
             font-size: 1em;
             transition: border-color 0.3s;
             font-family: inherit;
+            /* Transición para el color del borde */
         }
-
+        /* Estilos al enfocar campos de entrada y select */
         input[type="text"]:focus,
         input[type="email"]:focus,
         input[type="password"]:focus,
@@ -133,11 +143,12 @@
             outline: none;
             border-color: #667eea;
         }
-
+        /* Fila de formulario con diseño de cuadrícula */
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
+            /* Espacio entre columnas */
         }
 
         button {
@@ -151,90 +162,96 @@
             font-weight: 600;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
+            /* Efectos de transición para el botón */
         }
 
         button:hover {
+            /* Efecto hover para el botón */
             transform: translateY(-2px);
             box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
         }
 
         button:active {
+            /* Efecto al hacer clic en el botón */
             transform: translateY(0);
         }
-
+        /* Estilos generales para mensajes de alerta */
         .alert {
             padding: 15px;
             border-radius: 6px;
             margin-bottom: 20px;
             font-weight: 600;
         }
-
+        /* Estilos para alertas de éxito */
         .alert-success {
             background-color: #d4edda;
             color: #155724;
             border: 1px solid #c3e6cb;
         }
-
+        /* Estilos para alertas de error */
         .alert-error {
             background-color: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
-
+        /* Estilos para enlaces de texto */
         .link-text {
             text-align: center;
             margin-top: 20px;
             color: #666;
         }
-
+        /* Estilos para enlaces dentro del texto */
         .link-text a {
             color: #667eea;
             text-decoration: none;
             font-weight: 600;
             cursor: pointer;
         }
-
+        /* Efecto hover para enlaces de texto */
         .link-text a:hover {
             text-decoration: underline;
         }
-
+        /* Clase para ocultar elementos */
         .hidden {
             display: none;
         }
-
+        /* Clase para secciones de formulario */
         .form-section {
             display: none;
         }
-
+        /* Clase para la sección de formulario activa */
         .form-section.active {
             display: block;
         }
-
+        /* Enlace a la página de inicio */
         .home-link {
             text-align: center;
             margin-top: 20px;
         }
-
+        /* Estilos para el enlace de inicio */
         .home-link a {
             color: #667eea;
             text-decoration: none;
             font-weight: 600;
         }
-
+        /* Efecto hover para el enlace de inicio */
         .home-link a:hover {
             text-decoration: underline;
         }
     </style>
 </head>
 <body>
+    <!-- Contenedor principal de la vista de autenticación -->
     <div class="container">
         <?php
+        // Determina si se muestra la página de inicio de sesión o registro.
         if ($page === 'login') {
             ?>
             <h1>🔐 Inicio de Sesión</h1>
             <p class="subtitle">Accede a tu cuenta</p>
 
             <?php if (isset($result)): ?>
+                <!-- Muestra mensajes de éxito o error después de un intento de inicio de sesión -->
                 <div class="alert <?php echo $result['success'] ? 'alert-success' : 'alert-error'; ?>">
                     <?php echo htmlspecialchars($result['message']); ?>
                 </div>
@@ -242,12 +259,14 @@
                     <p style="text-align: center; color: #155724; font-weight: 600;">
                         Redirigiendo al panel de control...
                     </p>
+                    <!-- Redirige al dashboard después de un inicio de sesión exitoso -->
                     <script>
                         setTimeout(() => { window.location.href = '?action=dashboard'; }, 1500);
                     </script>
                 <?php endif; ?>
             <?php endif; ?>
 
+            <!-- Pestañas para seleccionar el tipo de usuario al iniciar sesión -->
             <div class="user-type-tabs">
                 <button class="user-type-btn active" onclick="selectUserType('viajero', this)">👤 Viajero</button>
                 <button class="user-type-btn" onclick="selectUserType('vehiculo', this)">🚗 Conductor</button>
@@ -255,7 +274,7 @@
                 <button class="user-type-btn" onclick="selectUserType('admin', this)">🔑 Admin</button>
             </div>
 
-            <!-- Viajero Login -->
+            <!-- Formulario de inicio de sesión para Viajero -->
             <form method="POST" action="?action=login" class="form-section active" id="form-viajero">
                 <input type="hidden" name="user_type" value="viajero">
                 <div class="form-group">
@@ -270,7 +289,7 @@
                 <p class="link-text">¿No tienes cuenta? <a onclick="location.href='?action=signup'">Regístrate aquí</a></p>
             </form>
 
-            <!-- Conductor Login -->
+            <!-- Formulario de inicio de sesión para Conductor -->
             <form method="POST" action="?action=login" class="form-section" id="form-vehiculo">
                 <input type="hidden" name="user_type" value="vehiculo">
                 <div class="form-group">
@@ -285,7 +304,7 @@
                 <p class="link-text">¿No tienes cuenta? <a onclick="location.href='?action=signup'">Regístrate aquí</a></p>
             </form>
 
-            <!-- Hotel Login -->
+            <!-- Formulario de inicio de sesión para Hotel -->
             <form method="POST" action="?action=login" class="form-section" id="form-hotel">
                 <input type="hidden" name="user_type" value="hotel">
                 <div class="form-group">
@@ -300,7 +319,7 @@
                 <p class="link-text">¿No tienes cuenta? <a onclick="location.href='?action=signup'">Regístrate aquí</a></p>
             </form>
 
-            <!-- Admin Login -->
+            <!-- Formulario de inicio de sesión para Administrador -->
             <form method="POST" action="?action=login" class="form-section" id="form-admin">
                 <input type="hidden" name="user_type" value="admin">
                 <div class="form-group">
@@ -319,15 +338,17 @@
         } else {
             // Página de registro
             ?>
+            <!-- Título y subtítulo para la página de registro -->
             <h1>📝 Registro</h1>
             <p class="subtitle">Crea una nueva cuenta</p>
 
             <?php if (isset($result)): ?>
+                <!-- Muestra mensajes de éxito o error después de un intento de registro -->
                 <div class="alert <?php echo $result['success'] ? 'alert-success' : 'alert-error'; ?>">
                     <?php echo htmlspecialchars($result['message']); ?>
                 </div>
             <?php endif; ?>
-
+            <!-- Pestañas para seleccionar el tipo de usuario al registrarse -->
             <div class="user-type-tabs">
                 <button class="user-type-btn active" onclick="selectUserType('viajero', this)">👤 Viajero</button>
                 <button class="user-type-btn" onclick="selectUserType('vehiculo', this)">🚗 Conductor</button>
@@ -335,6 +356,7 @@
             </div>
 
             <!-- Viajero Signup -->
+            <!-- Formulario de registro para Viajero -->
             <form method="POST" action="?action=register" class="form-section active" id="form-viajero">
                 <input type="hidden" name="user_type" value="viajero">
                 <div class="form-group">
@@ -381,7 +403,7 @@
                 <p class="link-text">¿Ya tienes cuenta? <a onclick="location.href='?action=auth'">Inicia sesión</a></p>
             </form>
 
-            <!-- Conductor Signup -->
+            <!-- Formulario de registro para Conductor -->
             <form method="POST" action="?action=register" class="form-section" id="form-vehiculo">
                 <input type="hidden" name="user_type" value="vehiculo">
                 <div class="form-group">
@@ -400,7 +422,7 @@
                 <p class="link-text">¿Ya tienes cuenta? <a onclick="location.href='?action=auth'">Inicia sesión</a></p>
             </form>
 
-            <!-- Hotel Signup -->
+            <!-- Formulario de registro para Hotel -->
             <form method="POST" action="?action=register" class="form-section" id="form-hotel">
                 <input type="hidden" name="user_type" value="hotel">
                 <div class="form-group">
@@ -425,16 +447,21 @@
     </div>
 
     <script>
+        // Función JavaScript para cambiar entre los formularios de tipo de usuario (login/signup)
         function selectUserType(userType, button) {
+            // Remueve la clase 'active' de todos los botones de tipo de usuario
             document.querySelectorAll('.user-type-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
+            // Añade la clase 'active' al botón clickeado
             button.classList.add('active');
 
+            // Oculta todas las secciones de formulario y muestra la correspondiente al tipo de usuario seleccionado
             document.querySelectorAll('.form-section').forEach(section => {
                 section.classList.remove('active');
             });
             document.getElementById('form-' + userType).classList.add('active');
+            // Actualiza el valor del campo oculto 'user_type'
             document.querySelector('input[name="user_type"]').value = userType;
         }
     </script>

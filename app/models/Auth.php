@@ -1,21 +1,31 @@
 <?php
 
+// Clase Auth: Gestiona la autenticación y registro de diferentes tipos de usuarios.
 class Auth {
     private $pdo;
     
+    /**
+     * Constructor de la clase Auth.
+     * @param PDO $pdo Instancia de la conexión a la base de datos.
+     */
     public function __construct($pdo) {
         $this->pdo = $pdo;
     }
 
     /**
-     * Register a hotel
+     * Registra un nuevo hotel en la base de datos.
+     * @param string $nombre Nombre del hotel.
+     * @param string $usuario Nombre de usuario para el hotel.
+     * @param string $password Contraseña del hotel.
+     * @param int|null $id_zona ID de la zona a la que pertenece el hotel (opcional).
+     * @return array Un array con el estado de éxito y un mensaje.
      */
     public function registerHotel($nombre, $usuario, $password, $id_zona = null) {
         if (empty($nombre) || empty($usuario) || empty($password)) {
             return ['success' => false, 'message' => 'Nombre, usuario y contraseña son requeridos'];
         }
 
-        // Check if usuario already exists
+        // Verifica si el usuario ya existe.
         $stmt = $this->pdo->prepare('SELECT id_hotel FROM tranfer_hotel WHERE usuario = :usuario');
         $stmt->execute([':usuario' => $usuario]);
         if ($stmt->fetch()) {
@@ -23,6 +33,7 @@ class Auth {
         }
 
         try {
+            // Hashea la contraseña antes de almacenarla.
             $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
             $stmt = $this->pdo->prepare('INSERT INTO tranfer_hotel (nombre, usuario, password, id_zona) VALUES (:nombre, :usuario, :password, :id_zona)');
             $result = $stmt->execute([
@@ -32,23 +43,29 @@ class Auth {
                 ':id_zona' => $id_zona
             ]);
             
+            // Devuelve el resultado del registro.
             if ($result) {
                 return ['success' => true, 'message' => 'Hotel registrado exitosamente', 'id_hotel' => $this->pdo->lastInsertId()];
             }
         } catch (Exception $e) {
+            // Captura y devuelve cualquier error durante el registro.
             return ['success' => false, 'message' => 'Error al registrar hotel: ' . $e->getMessage()];
         }
     }
 
     /**
-     * Register a vehicle/conductor
+     * Registra un nuevo vehículo/conductor en la base de datos.
+     * @param string $email_conductor Email del conductor.
+     * @param string $descripcion Descripción del vehículo.
+     * @param string $password Contraseña del conductor.
+     * @return array Un array con el estado de éxito y un mensaje.
      */
     public function registerVehiculo($email_conductor, $descripcion, $password) {
         if (empty($email_conductor) || empty($descripcion) || empty($password)) {
             return ['success' => false, 'message' => 'Email, descripción y contraseña son requeridos'];
         }
 
-        // Check if email already exists
+        // Verifica si el email del conductor ya existe.
         $stmt = $this->pdo->prepare('SELECT id_vehiculo FROM transfer_vehiculo WHERE email_conductor = :email');
         $stmt->execute([':email' => $email_conductor]);
         if ($stmt->fetch()) {
@@ -56,6 +73,7 @@ class Auth {
         }
 
         try {
+            // Hashea la contraseña antes de almacenarla.
             $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
             $stmt = $this->pdo->prepare('INSERT INTO transfer_vehiculo (email_conductor, Descripción, password) VALUES (:email, :descripcion, :password)');
             $result = $stmt->execute([
@@ -64,23 +82,35 @@ class Auth {
                 ':password' => $hashedPassword
             ]);
             
+            // Devuelve el resultado del registro.
             if ($result) {
                 return ['success' => true, 'message' => 'Vehículo registrado exitosamente', 'id_vehiculo' => $this->pdo->lastInsertId()];
             }
         } catch (Exception $e) {
+            // Captura y devuelve cualquier error durante el registro.
             return ['success' => false, 'message' => 'Error al registrar vehículo: ' . $e->getMessage()];
         }
     }
 
     /**
-     * Register a traveler
+     * Registra un nuevo viajero en la base de datos.
+     * @param string $email Email del viajero.
+     * @param string $nombre Nombre del viajero.
+     * @param string $apellido1 Primer apellido del viajero.
+     * @param string $apellido2 Segundo apellido del viajero.
+     * @param string $direccion Dirección del viajero.
+     * @param string $codigoPostal Código postal del viajero.
+     * @param string $ciudad Ciudad del viajero.
+     * @param string $pais País del viajero.
+     * @param string $password Contraseña del viajero.
+     * @return array Un array con el estado de éxito y un mensaje.
      */
     public function registerViajero($email, $nombre, $apellido1, $apellido2, $direccion, $codigoPostal, $ciudad, $pais, $password) {
         if (empty($email) || empty($nombre) || empty($apellido1) || empty($password)) {
             return ['success' => false, 'message' => 'Email, nombre, apellido y contraseña son requeridos'];
         }
 
-        // Check if email already exists
+        // Verifica si el email del viajero ya existe.
         $stmt = $this->pdo->prepare('SELECT id_viajero FROM transfer_viajeros WHERE email = :email');
         $stmt->execute([':email' => $email]);
         if ($stmt->fetch()) {
@@ -88,6 +118,7 @@ class Auth {
         }
 
         try {
+            // Hashea la contraseña antes de almacenarla.
             $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
             $stmt = $this->pdo->prepare('
                 INSERT INTO transfer_viajeros 
@@ -106,16 +137,21 @@ class Auth {
                 ':password' => $hashedPassword
             ]);
             
+            // Devuelve el resultado del registro.
             if ($result) {
                 return ['success' => true, 'message' => 'Viajero registrado exitosamente', 'id_viajero' => $this->pdo->lastInsertId()];
             }
         } catch (Exception $e) {
+            // Captura y devuelve cualquier error durante el registro.
             return ['success' => false, 'message' => 'Error al registrar viajero: ' . $e->getMessage()];
         }
     }
 
     /**
-     * Login hotel
+     * Inicia sesión para un usuario de tipo hotel.
+     * @param string $usuario Nombre de usuario del hotel.
+     * @param string $password Contraseña del hotel.
+     * @return array Un array con el estado de éxito y un mensaje.
      */
     public function loginHotel($usuario, $password) {
         if (empty($usuario) || empty($password)) {
@@ -123,10 +159,12 @@ class Auth {
         }
 
         try {
+            // Busca el hotel por su nombre de usuario.
             $stmt = $this->pdo->prepare('SELECT * FROM tranfer_hotel WHERE usuario = :usuario');
             $stmt->execute([':usuario' => $usuario]);
             $hotel = $stmt->fetch(PDO::FETCH_ASSOC);
 
+            // Verifica la contraseña y establece las variables de sesión si es correcta.
             if ($hotel && password_verify($password, $hotel['password'])) {
                 $_SESSION['user_type'] = 'hotel';
                 $_SESSION['user_id'] = $hotel['id_hotel'];
