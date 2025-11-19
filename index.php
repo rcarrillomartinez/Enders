@@ -60,6 +60,8 @@ try {
             $controller->update();
         } elseif ($action === 'delete' && $id) {
             $controller->delete($id);
+        } elseif ($action === 'vehiculos_filter' && isset($_GET['viajeros'])) {
+            $controller->filterVehiculos();
         } else {
             $controller->index();
         }

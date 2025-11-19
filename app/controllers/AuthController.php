@@ -49,27 +49,74 @@ class AuthController extends Controller {
     }
 
     public function register() {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: ?action=signup');
-            exit;
-        }
-
-        $userType = $_POST['user_type'] ?? '';
-        $auth = new Auth($this->pdo);
-        $result = [];
-
-        // This is a simplified example. You should add proper validation.
-        switch ($userType) {
-            case 'viajero':
-                $result = $auth->registerViajero($_POST['email'], $_POST['nombre'], $_POST['apellido1'], $_POST['apellido2'], $_POST['direccion'], $_POST['codigoPostal'], $_POST['ciudad'], $_POST['pais'], $_POST['password']);
-                break;
-            // Add cases for other user types if needed
-            default:
-                $result = ['success' => false, 'message' => 'Tipo de usuario no válido para registro.'];
-        }
-
-        $this->view('AuthView', ['page' => 'signup', 'result' => $result]);
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        header('Location: ?action=signup');
+        exit;
     }
+    $userType = $_POST['user_type'] ?? '';
+    $auth = new Auth($this->pdo);
+    $result = ['success' => false, 'message' => ''];
+
+    switch ($userType) {
+        case 'viajero':
+            $email = trim($_POST['email'] ?? '');
+            $password = $_POST['password'] ?? '';
+            $passwordConfirm = $_POST['password_confirm'] ?? '';
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $result['message'] = 'Email no válido.';
+            } elseif (strlen($password) < 6) {
+                $result['message'] = 'Contraseña mínima 6 caracteres.';
+            } elseif ($password !== $passwordConfirm) {
+                $result['message'] = 'Las contraseñas no coinciden.';
+            } else {
+                $result = $auth->registerViajero(
+                    $email,
+                    $_POST['nombre'] ?? '',
+                    $_POST['apellido1'] ?? '',
+                    $_POST['apellido2'] ?? '',
+                    $_POST['direccion'] ?? '',
+                    $_POST['codigoPostal'] ?? '',
+                    $_POST['ciudad'] ?? '',
+                    $_POST['pais'] ?? '',
+                    $password
+                );
+            }
+            break;
+
+        case 'vehiculo':
+            $email = trim($_POST['email_conductor'] ?? '');
+            $descripcion = trim($_POST['descripcion'] ?? '');
+            $password = $_POST['password'] ?? '';
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $result['message'] = 'Email del conductor no válido.';
+            } elseif (strlen($password) < 6) {
+                $result['message'] = 'Contraseña mínima 6 caracteres.';
+            } elseif (empty($descripcion)) {
+                $result['message'] = 'Descripción de vehículo requerida.';
+            } else {
+                $result = $auth->registerVehiculo($email, $descripcion, $password);
+            }
+            break;
+
+        case 'hotel':
+            $usuario = trim($_POST['usuario'] ?? '');
+            $password = $_POST['password'] ?? '';
+            $id_zona = !empty($_POST['id_zona']) ? (int)$_POST['id_zona'] : null;
+            if (empty($usuario)) {
+                $result['message'] = 'Usuario de hotel requerido.';
+            } elseif (strlen($password) < 6) {
+                $result['message'] = 'Contraseña mínima 6 caracteres.';
+            } else {
+                $result = $auth->registerHotel($usuario, $password, $id_zona);
+            }
+            break;
+
+        default:
+            $result['message'] = 'Tipo de usuario no válido para registro.';
+    }
+
+    $this->view('AuthView', ['page' => 'signup', 'result' => $result]);
+}
 
     public function logout() {
         $auth = new Auth($this->pdo);
