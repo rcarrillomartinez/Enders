@@ -83,7 +83,9 @@ class AuthController extends Controller {
             case 'viajero':
                 $result = $auth->registerViajero($_POST['email'], $_POST['nombre'], $_POST['apellido1'], $_POST['apellido2'], $_POST['direccion'], $_POST['codigoPostal'], $_POST['ciudad'], $_POST['pais'], $_POST['password']);
                 break;
-            // Añadir casos para otros tipos de usuario si es necesario.
+            case 'hotel':
+                $result = $auth->registerHotel($_POST);
+                break;
             default:
                 $result = ['success' => false, 'message' => 'Tipo de usuario no válido para registro.'];
         }

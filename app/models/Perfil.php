@@ -21,8 +21,7 @@ class Perfil {
         return match (strtolower($userType)) {
             'admin' => ['table' => 'transfer_admin', 'id_col' => 'id_admin', 'identifier' => 'email'],
             'viajero' => ['table' => 'transfer_viajeros', 'id_col' => 'id_viajero', 'identifier' => 'email'],
-            'hotel' => ['table' => 'hotel', 'id_col' => 'id_hotel', 'identifier' => 'usuario'],
-            'vehiculo' => ['table' => 'vehiculo', 'id_col' => 'id_vehiculo', 'identifier' => 'email_conductor'],
+            'hotel' => ['table' => 'tranfer_hotel', 'id_col' => 'id_hotel', 'identifier' => 'usuario'],
             default => ['table' => null, 'id_col' => null, 'identifier' => null],
         };
     }

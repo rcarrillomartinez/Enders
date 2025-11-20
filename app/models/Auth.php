@@ -14,40 +14,45 @@ class Auth {
 
     /**
      * Registra un nuevo hotel en la base de datos.
-     * @param string $nombre Nombre del hotel.
-     * @param string $usuario Nombre de usuario para el hotel.
-     * @param string $password Contraseña del hotel.
-     * @param int|null $id_zona ID de la zona a la que pertenece el hotel (opcional).
+     * @param array $data Datos del hotel a registrar.
      * @return array Un array con el estado de éxito y un mensaje.
      */
-    public function registerHotel($nombre, $usuario, $password, $id_zona = null) {
-        if (empty($nombre) || empty($usuario) || empty($password)) {
-            return ['success' => false, 'message' => 'Nombre, usuario y contraseña son requeridos'];
+    public function registerHotel($data) {
+        // Extrae los datos del array, con valores por defecto.
+        $usuario = $data['usuario'] ?? '';
+        $password = $data['password'] ?? '';
+        $nombre_hotel = $data['nombre_hotel'] ?? ''; // This comes from the form
+        $id_zona = !empty($data['id_zona']) ? $data['id_zona'] : null;
+
+        if (empty($usuario) || empty($password) || empty($nombre_hotel)) {
+            return ['success' => false, 'message' => 'Usuario, contraseña y nombre del hotel son requeridos.'];
         }
 
-        // Verifica si el usuario ya existe.
+        // Verifica si el nombre de usuario ya existe.
         $stmt = $this->pdo->prepare('SELECT id_hotel FROM tranfer_hotel WHERE usuario = :usuario');
         $stmt->execute([':usuario' => $usuario]);
         if ($stmt->fetch()) {
-            return ['success' => false, 'message' => 'El usuario ya existe'];
+            return ['success' => false, 'message' => 'El nombre de usuario ya existe.'];
         }
 
         try {
-            // Hashea la contraseña antes de almacenarla.
+            // Hashea la contraseña antes de almacenarla
             $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
-            $stmt = $this->pdo->prepare('INSERT INTO tranfer_hotel (nombre, usuario, password, id_zona) VALUES (:nombre, :usuario, :password, :id_zona)');
+            $stmt = $this->pdo->prepare(
+                'INSERT INTO tranfer_hotel (usuario, password, nombre_hotel, id_zona) 
+                 VALUES (:usuario, :password, :nombre_hotel, :id_zona)'
+            );
             $result = $stmt->execute([
                 ':usuario' => $usuario,
-                ':nombre' => $nombre,
                 ':password' => $hashedPassword,
+                ':nombre_hotel' => $nombre_hotel,
                 ':id_zona' => $id_zona
             ]);
             
-            // Devuelve el resultado del registro.
             if ($result) {
-                return ['success' => true, 'message' => 'Hotel registrado exitosamente', 'id_hotel' => $this->pdo->lastInsertId()];
+                return ['success' => true, 'message' => 'Hotel registrado exitosamente. Ahora puedes iniciar sesión.'];
             }
-        } catch (Exception $e) {
+        } catch (PDOException $e) {
             // Captura y devuelve cualquier error durante el registro.
             return ['success' => false, 'message' => 'Error al registrar hotel: ' . $e->getMessage()];
         }

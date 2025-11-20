@@ -233,12 +233,14 @@
                 <a href="?action=profile" class="action-btn">
                     👤 Mi Perfil
                 </a>
-                <a href="?action=gestion_reservas" class="action-btn">
-                    📦 Gestionar Reservas
-                </a>
-                <a href="?action=index" class="action-btn secondary">
-                    📅 Ver Calendario de Reservas
-                </a>
+                <?php if ($user['user_type'] !== 'hotel'): ?>
+                    <a href="?action=gestion_reservas" class="action-btn">
+                        📦 Gestionar Reservas
+                    </a>
+                    <a href="?action=index" class="action-btn secondary">
+                        📅 Ver Calendario de Reservas
+                    </a>
+                <?php endif; ?>
             </div>
 
         <?php else: ?>

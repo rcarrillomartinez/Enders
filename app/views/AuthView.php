@@ -398,7 +398,11 @@
                     <input type="password" id="password-hotel" name="password" required placeholder="••••••••">
                 </div>
                 <div class="form-group">
-                    <label for="id_zona-hotel">Zona (Opcional)</label>
+                    <label for="nombre_hotel-hotel">Nombre del Hotel *</label>
+                    <input type="text" id="nombre_hotel-hotel" name="nombre_hotel" required placeholder="Nombre del hotel">
+                </div>
+                <div class="form-group">
+                    <label for="id_zona-hotel">Zona</label>
                     <input type="number" id="id_zona-hotel" name="id_zona" placeholder="1">
                 </div>
                 <button type="submit">Registrarse como Hotel</button>
