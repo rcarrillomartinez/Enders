@@ -16,9 +16,9 @@ services:
       - db
     environment:
       - DB_HOST=db
-      - DB_NAME=enders_db
-      - DB_USER=enders_user
-      - DB_PASSWORD=secret
+      - DB_NAME=wordpress6
+      - DB_USER=wordpress6
+      - DB_PASSWORD=ZApzis0YqfKOY2Pw
 
   # Servicio de Base de Datos (MariaDB)
   db:
@@ -26,10 +26,10 @@ services:
     container_name: enders-db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root_secret
-      MYSQL_DATABASE: enders_db
-      MYSQL_USER: enders_user
-      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: wordpress6
+      MYSQL_DATABASE: wordpress6
+      MYSQL_USER: wordpress6
+      MYSQL_PASSWORD: ZApzis0YqfKOY2Pw
     volumes:
       - db_data:/var/lib/mysql
 
@@ -46,3 +46,4 @@ services:
 
 volumes:
   db_data:
+
