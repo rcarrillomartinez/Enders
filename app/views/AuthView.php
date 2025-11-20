@@ -269,7 +269,6 @@
             <!-- Pestañas para seleccionar el tipo de usuario al iniciar sesión -->
             <div class="user-type-tabs">
                 <button class="user-type-btn active" onclick="selectUserType('viajero', this)">👤 Viajero</button>
-                <button class="user-type-btn" onclick="selectUserType('vehiculo', this)">🚗 Conductor</button>
                 <button class="user-type-btn" onclick="selectUserType('hotel', this)">🏨 Hotel</button>
                 <button class="user-type-btn" onclick="selectUserType('admin', this)">🔑 Admin</button>
             </div>
@@ -284,21 +283,6 @@
                 <div class="form-group">
                     <label for="password-viajero">Contraseña</label>
                     <input type="password" id="password-viajero" name="password" required placeholder="••••••••">
-                </div>
-                <button type="submit">Iniciar Sesión</button>
-                <p class="link-text">¿No tienes cuenta? <a onclick="location.href='?action=signup'">Regístrate aquí</a></p>
-            </form>
-
-            <!-- Formulario de inicio de sesión para Conductor -->
-            <form method="POST" action="?action=login" class="form-section" id="form-vehiculo">
-                <input type="hidden" name="user_type" value="vehiculo">
-                <div class="form-group">
-                    <label for="email-vehiculo">Email del Conductor</label>
-                    <input type="email" id="email-vehiculo" name="email" required placeholder="conductor@email.com">
-                </div>
-                <div class="form-group">
-                    <label for="password-vehiculo">Contraseña</label>
-                    <input type="password" id="password-vehiculo" name="password" required placeholder="••••••••">
                 </div>
                 <button type="submit">Iniciar Sesión</button>
                 <p class="link-text">¿No tienes cuenta? <a onclick="location.href='?action=signup'">Regístrate aquí</a></p>
@@ -351,7 +335,6 @@
             <!-- Pestañas para seleccionar el tipo de usuario al registrarse -->
             <div class="user-type-tabs">
                 <button class="user-type-btn active" onclick="selectUserType('viajero', this)">👤 Viajero</button>
-                <button class="user-type-btn" onclick="selectUserType('vehiculo', this)">🚗 Conductor</button>
                 <button class="user-type-btn" onclick="selectUserType('hotel', this)">🏨 Hotel</button>
             </div>
 
@@ -400,25 +383,6 @@
                     <input type="password" id="password-viajero" name="password" required placeholder="••••••••">
                 </div>
                 <button type="submit">Registrarse como Viajero</button>
-                <p class="link-text">¿Ya tienes cuenta? <a onclick="location.href='?action=auth'">Inicia sesión</a></p>
-            </form>
-
-            <!-- Formulario de registro para Conductor -->
-            <form method="POST" action="?action=register" class="form-section" id="form-vehiculo">
-                <input type="hidden" name="user_type" value="vehiculo">
-                <div class="form-group">
-                    <label for="email-conductor">Email del Conductor *</label>
-                    <input type="email" id="email-conductor" name="email_conductor" required placeholder="conductor@email.com">
-                </div>
-                <div class="form-group">
-                    <label for="descripcion-vehiculo">Descripción del Vehículo *</label>
-                    <input type="text" id="descripcion-vehiculo" name="descripcion" required placeholder="Ej: Toyota Prius Blanco, Placa XXX">
-                </div>
-                <div class="form-group">
-                    <label for="password-conductor">Contraseña *</label>
-                    <input type="password" id="password-conductor" name="password" required placeholder="••••••••">
-                </div>
-                <button type="submit">Registrarse como Conductor</button>
                 <p class="link-text">¿Ya tienes cuenta? <a onclick="location.href='?action=auth'">Inicia sesión</a></p>
             </form>
 

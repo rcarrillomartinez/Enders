@@ -49,9 +49,6 @@ class AuthController extends Controller {
             case 'viajero':
                 $result = $auth->loginViajero($_POST['email'], $_POST['password']);
                 break;
-            case 'vehiculo':
-                $result = $auth->loginVehiculo($_POST['email'], $_POST['password']);
-                break;
             case 'hotel':
                 $result = $auth->loginHotel($_POST['usuario'], $_POST['password']);
                 break;

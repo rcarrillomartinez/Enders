@@ -1,9 +1,15 @@
 <?php
-// app/views/PerfilView.php
-// Asume $user (sesión), $data (datos actuales), $errors, $message
+// PerfilView.php - Vista para mostrar y actualizar el perfil del usuario.
+// Esta vista recibe las siguientes variables desde el controlador:
+// - $user: Array con la información del usuario de la sesión (tipo, id, nombre).
+// - $data: Array con los datos completos del perfil obtenidos de la base de datos.
+// - $errors: Array con mensajes de error, si los hay.
+// - $message: Mensaje de éxito, si lo hay.
 
+// Prepara los datos para mostrarlos en el formulario.
 $currentData = $data ?? [];
 $isViajero = $user['user_type'] === 'viajero';
+// Determina la etiqueta del campo identificador (Email o Usuario) según el tipo de usuario.
 $identifierLabel = $isViajero || $user['user_type'] === 'admin' ? 'Email' : 'Usuario';
 $identifierValue = $currentData['email'] ?? $currentData['usuario'] ?? '';
 ?>
@@ -168,6 +174,7 @@ $identifierValue = $currentData['email'] ?? $currentData['usuario'] ?? '';
     </style>
 </head>
 <body>
+    <!-- Barra de navegación superior con enlaces al dashboard y para cerrar sesión. -->
     <div class="navbar">
         <h2>🏝️ Transfer Reservas</h2>
         <div class="navbar-links">
@@ -176,23 +183,29 @@ $identifierValue = $currentData['email'] ?? $currentData['usuario'] ?? '';
         </div>
     </div>
 
+    <!-- Contenedor principal del formulario de perfil. -->
     <div class="container">
         <h1>👤 Mi Perfil</h1>
         <p class="subtitle">Actualiza los datos de tu cuenta de <?= ucfirst($user['user_type']) ?></p>
 
+        <!-- Muestra mensajes de error si existen. -->
         <?php if (!empty($errors)): ?>
             <div class="alert alert-error"><?= htmlspecialchars(implode(', ', $errors)) ?></div>
         <?php endif; ?>
+        <!-- Muestra un mensaje de éxito si existe. -->
         <?php if ($message): ?>
             <div class="alert alert-success"><?= htmlspecialchars($message) ?></div>
         <?php endif; ?>
 
+        <!-- Formulario para actualizar el perfil. Envía los datos a la acción 'profile_update'. -->
         <form action="?action=profile_update" method="POST">
+            <!-- Campo para el identificador principal (Email o Usuario). -->
             <div class="form-group">
                 <label for="identifier"><?= $identifierLabel ?>:</label>
                 <input type="text" name="email" id="identifier" value="<?= htmlspecialchars($identifierValue) ?>" required>
             </div>
 
+            <!-- Campo para el nombre, se muestra solo si el tipo de usuario lo requiere. -->
             <?php if (isset($currentData['nombre']) || $user['user_type'] === 'viajero' || $user['user_type'] === 'admin'): ?>
             <div class="form-group">
                 <label for="nombre">Nombre:</label>
@@ -200,6 +213,7 @@ $identifierValue = $currentData['email'] ?? $currentData['usuario'] ?? '';
             </div>
             <?php endif; ?>
 
+            <!-- Separador para la sección de cambio de contraseña. -->
             <hr>
 
             <p class="subtitle" style="margin-bottom: 20px;">Cambiar Contraseña (dejar en blanco para no modificar)</p>

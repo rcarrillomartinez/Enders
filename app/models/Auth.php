@@ -54,45 +54,6 @@ class Auth {
     }
 
     /**
-     * Registra un nuevo vehículo/conductor en la base de datos.
-     * @param string $email_conductor Email del conductor.
-     * @param string $descripcion Descripción del vehículo.
-     * @param string $password Contraseña del conductor.
-     * @return array Un array con el estado de éxito y un mensaje.
-     */
-    public function registerVehiculo($email_conductor, $descripcion, $password) {
-        if (empty($email_conductor) || empty($descripcion) || empty($password)) {
-            return ['success' => false, 'message' => 'Email, descripción y contraseña son requeridos'];
-        }
-
-        // Verifica si el email del conductor ya existe.
-        $stmt = $this->pdo->prepare('SELECT id_vehiculo FROM transfer_vehiculo WHERE email_conductor = :email');
-        $stmt->execute([':email' => $email_conductor]);
-        if ($stmt->fetch()) {
-            return ['success' => false, 'message' => 'El email del conductor ya está registrado'];
-        }
-
-        try {
-            // Hashea la contraseña antes de almacenarla.
-            $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
-            $stmt = $this->pdo->prepare('INSERT INTO transfer_vehiculo (email_conductor, Descripción, password) VALUES (:email, :descripcion, :password)');
-            $result = $stmt->execute([
-                ':email' => $email_conductor,
-                ':descripcion' => $descripcion,
-                ':password' => $hashedPassword
-            ]);
-            
-            // Devuelve el resultado del registro.
-            if ($result) {
-                return ['success' => true, 'message' => 'Vehículo registrado exitosamente', 'id_vehiculo' => $this->pdo->lastInsertId()];
-            }
-        } catch (Exception $e) {
-            // Captura y devuelve cualquier error durante el registro.
-            return ['success' => false, 'message' => 'Error al registrar vehículo: ' . $e->getMessage()];
-        }
-    }
-
-    /**
      * Registra un nuevo viajero en la base de datos.
      * @param string $email Email del viajero.
      * @param string $nombre Nombre del viajero.
@@ -174,33 +135,6 @@ class Auth {
             }
 
             return ['success' => false, 'message' => 'Usuario o contraseña incorrectos'];
-        } catch (Exception $e) {
-            return ['success' => false, 'message' => 'Error en el login: ' . $e->getMessage()];
-        }
-    }
-
-    /**
-     * Login vehicle/conductor
-     */
-    public function loginVehiculo($email, $password) {
-        if (empty($email) || empty($password)) {
-            return ['success' => false, 'message' => 'Email y contraseña son requeridos'];
-        }
-
-        try {
-            $stmt = $this->pdo->prepare('SELECT * FROM transfer_vehiculo WHERE email_conductor = :email');
-            $stmt->execute([':email' => $email]);
-            $vehiculo = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if ($vehiculo && password_verify($password, $vehiculo['password'])) {
-                $_SESSION['user_type'] = 'vehiculo';
-                $_SESSION['user_id'] = $vehiculo['id_vehiculo'];
-                $_SESSION['user_name'] = $vehiculo['email_conductor'];
-                $_SESSION['user_email'] = $vehiculo['email_conductor'];
-                return ['success' => true, 'message' => 'Inicio de sesión exitoso', 'user' => $vehiculo];
-            }
-
-            return ['success' => false, 'message' => 'Email o contraseña incorrectos'];
         } catch (Exception $e) {
             return ['success' => false, 'message' => 'Error en el login: ' . $e->getMessage()];
         }

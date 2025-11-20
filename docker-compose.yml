@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  # Servicio Web con Apache y PHP
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: enders-web
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www/html
+      - ./docker/vhost.conf:/etc/apache2/sites-available/000-default.conf
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_NAME=enders_db
+      - DB_USER=enders_user
+      - DB_PASSWORD=secret
+
+  # Servicio de Base de Datos (MariaDB)
+  db:
+    image: mariadb:10.6
+    container_name: enders-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_secret
+      MYSQL_DATABASE: enders_db
+      MYSQL_USER: enders_user
+      MYSQL_PASSWORD: secret
+    volumes:
+      - db_data:/var/lib/mysql
+
+  # phpMyAdmin para gestionar la base de datos
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: enders-phpmyadmin
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+    depends_on:
+      - db
+
+volumes:
+  db_data:
