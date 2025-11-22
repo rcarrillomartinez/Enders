@@ -89,8 +89,8 @@ class TransferReserva {
                     apellido1_cliente, apellido2_cliente
                 ) VALUES (
                     :localizador, :id_hotel, :tipo_reserva, :email_cliente, NOW(), NOW(),
-                    :fecha_entrada, :hora_entrada, :numero_vuelo_entrada, :origen_vuelo_entrada, :fecha_vuelo_salida,
-                    :hora_partida, :num_viajeros, :id_vehiculo, :estado, :nombre_cliente, :apellido1_cliente,
+                    :fecha_entrada, :hora_entrada, :numero_vuelo_entrada, :origen_vuelo_entrada,
+                    :fecha_vuelo_salida, :hora_partida, :num_viajeros, :id_vehiculo, :estado, :nombre_cliente, :apellido1_cliente,
                     :apellido2_cliente
                 )";
         
@@ -99,17 +99,20 @@ class TransferReserva {
         // Determina el estado inicial de la reserva, permitiendo al admin establecerlo.
         $estado = (Auth::getCurrentUser()['user_type'] === 'admin' && isset($data['estado'])) ? $data['estado'] : 'pendiente';
 
+        $fecha_entrada = !empty($data['fecha_llegada']) ? $data['fecha_llegada'] : ($data['fecha_salida'] ?? date('Y-m-d'));
+        $fecha_salida = !empty($data['fecha_salida']) ? $data['fecha_salida'] : $fecha_entrada;
+
         $stmt->execute([
             ':localizador' => $localizador,
             ':id_hotel' => $data['id_hotel'] ?? null,
             ':tipo_reserva' => $data['tipo_reserva'] ?? null,
             ':email_cliente' => $data['email_cliente'],
-            ':fecha_entrada' => $data['fecha_llegada'] ?? null,
-            ':hora_entrada' => $data['hora_llegada'] ?? null,
-            ':numero_vuelo_entrada' => $data['vuelo_llegada'] ?? null,
-            ':origen_vuelo_entrada' => $data['origen_llegada'] ?? null,
-            ':fecha_vuelo_salida' => $data['fecha_salida'] ?? null,
-            ':hora_partida' => $data['hora_salida'] ?? null,
+            ':fecha_entrada' => $fecha_entrada,
+            ':hora_entrada' => !empty($data['hora_llegada']) ? $data['hora_llegada'] : '00:00:00',
+            ':numero_vuelo_entrada' => $data['vuelo_llegada'] ?? 'N/A',
+            ':origen_vuelo_entrada' => $data['origen_llegada'] ?? 'N/A',
+            ':fecha_vuelo_salida' => $fecha_salida,
+            ':hora_partida' => !empty($data['hora_partida']) ? $data['hora_partida'] : '00:00:00',
             ':num_viajeros' => $data['num_viajeros'] ?? 1,
             ':id_vehiculo' => $data['id_vehiculo'] ?? null,
             ':estado' => $estado,
@@ -136,7 +139,7 @@ class TransferReserva {
         } 
 
         $sql = "UPDATE {$this->table} SET
-                    id_hotel = :id_hotel,
+                    id_hotel = :id_hotel, 
                     id_tipo_reserva = :tipo_reserva,
                     email_cliente = :email_cliente,
                     fecha_modificacion = NOW(),
@@ -157,18 +160,21 @@ class TransferReserva {
         // Determina el estado de la reserva, permitiendo al admin establecerlo o manteniendo el actual.
         $estado = (Auth::getCurrentUser()['user_type'] === 'admin' && isset($data['estado'])) ? $data['estado'] : $this->getById($id)['estado'];
 
+        $fecha_entrada = !empty($data['fecha_llegada']) ? $data['fecha_llegada'] : ($data['fecha_salida'] ?? date('Y-m-d'));
+        $fecha_salida = !empty($data['fecha_salida']) ? $data['fecha_salida'] : $fecha_entrada;
+
         return $stmt->execute([
             ':id_reserva' => $id,
             ':id_hotel' => $data['id_hotel'] ?? null,
             ':tipo_reserva' => $data['tipo_reserva'] ?? null,
             ':email_cliente' => $data['email_cliente'],
-            ':fecha_entrada' => $data['fecha_llegada'] ?? null,
-            ':hora_entrada' => $data['hora_llegada'] ?? null,
-            ':numero_vuelo_entrada' => $data['vuelo_llegada'] ?? null,
-            ':origen_vuelo_entrada' => $data['origen_llegada'] ?? null,
-            ':fecha_vuelo_salida' => $data['fecha_salida'] ?? null,
-            ':hora_partida' => $data['hora_salida'] ?? null,
-            ':num_viajeros' => $data['num_viajeros'] ?? 1,
+            ':fecha_entrada' => $fecha_entrada,
+            ':hora_entrada' => !empty($data['hora_llegada']) ? $data['hora_llegada'] : '00:00:00',
+            ':numero_vuelo_entrada' => $data['vuelo_llegada'] ?? 'N/A',
+            ':origen_vuelo_entrada' => $data['origen_llegada'] ?? 'N/A',
+            ':fecha_vuelo_salida' => $fecha_salida,
+            ':hora_partida' => !empty($data['hora_partida']) ? $data['hora_partida'] : '00:00:00',
+            ':num_viajeros' => $data['num_viajeros'] ?? 1, // Default to 1 traveler
             ':id_vehiculo' => $data['id_vehiculo'] ?? null,
             ':estado' => $estado,
             ':nombre_cliente' => $data['nombre_cliente'] ?? '',
