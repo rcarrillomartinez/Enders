@@ -17,7 +17,10 @@ return new class extends Migration
             $table->string('password');
             $table->string('nombre_hotel');
             $table->unsignedBigInteger('id_zona')->nullable();
+            $table->integer('comision')->nullable();
             $table->timestamps();
+            
+            $table->foreign('id_zona')->references('id_zona')->on('transfer_zona')->onDelete('set null');
         });
     }
 

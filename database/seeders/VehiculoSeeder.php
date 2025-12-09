@@ -10,13 +10,13 @@ class VehiculoSeeder extends Seeder
     public function run()
     {
         $vehiculos = [
-            ['tipo_vehiculo' => 'Turismo', 'matricula' => 'ABC123', 'capacidad' => 4, 'id_hotel' => 1],
-            ['tipo_vehiculo' => 'Minivan', 'matricula' => 'DEF456', 'capacidad' => 8, 'id_hotel' => 1],
-            ['tipo_vehiculo' => 'Autobus', 'matricula' => 'GHI789', 'capacidad' => 40, 'id_hotel' => 2],
+            ['descripcion' => 'Toyota Corolla Rojo', 'capacidad' => 4, 'email_conductor' => 'conductor1@example.com', 'password' => '1234'],
+            ['descripcion' => 'Ford Fiesta Azul', 'capacidad' => 4, 'email_conductor' => 'conductor2@example.com', 'password' => '1234'],
+            ['descripcion' => 'Renault Clio Blanco', 'capacidad' => 4, 'email_conductor' => 'conductor3@example.com', 'password' => '1234'],
         ];
 
         foreach ($vehiculos as $vh) {
-            Vehiculo::updateOrCreate(['matricula' => $vh['matricula']], $vh);
+            Vehiculo::updateOrCreate(['email_conductor' => $vh['email_conductor']], $vh);
         }
     }
 }

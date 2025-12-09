@@ -13,13 +13,11 @@ return new class extends Migration
     {
         Schema::create('transfer_vehiculo', function (Blueprint $table) {
             $table->id('id_vehiculo');
-            $table->unsignedBigInteger('id_hotel');
-            $table->string('tipo_vehiculo');
-            $table->string('matricula')->unique();
+            $table->string('descripcion');
             $table->integer('capacidad');
+            $table->string('email_conductor');
+            $table->string('password');
             $table->timestamps();
-            
-            $table->foreign('id_hotel')->references('id_hotel')->on('tranfer_hotel')->onDelete('cascade');
         });
     }
 
