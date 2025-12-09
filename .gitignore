@@ -1,0 +1,70 @@
+# Laravel-specific
+/vendor/
+/node_modules/
+/.phan/
+/build/
+
+# Laravel Environment
+.env
+.env.backup
+.env.*.php
+.env.*.backup
+.env.production.backup
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Laravel Framework
+/bootstrap/cache/*
+/storage/logs/*
+/storage/debugbar/*
+
+# Log files
+*.log
+logs/
+
+# Composer
+composer.lock
+
+# Node
+npm-debug.log
+yarn-error.log
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Tests
+/coverage/
+.phpunit.result.cache
+
+# Local database files
+*.sqlite
+*.sqlite-journal
+database/database.sqlite
+
+# IDE specific
+.phpstorm.meta.php
+_ide_helper.php
+_ide_helper_models.php
+.php_cs.cache
+.php-cs-fixer.cache
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+*~
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# Configuration backups
+config.backup
