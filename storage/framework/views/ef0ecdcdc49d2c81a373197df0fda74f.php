@@ -1,6 +1,6 @@
 
 
-<?php $__env->startSection('title', 'Register'); ?>
+<?php $__env->startSection('title', 'Registro'); ?>
 
 <?php $__env->startSection('content'); ?>
     <div class="row justify-content-center">
@@ -39,7 +39,7 @@ endif;
 unset($__errorArgs, $__bag); ?>
                         </div>
 
-                        <!-- Viajero Fields -->
+                        <!-- Campos de Viajero -->
                         <div id="viajero-fields" style="display:none;">
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email</label>
@@ -139,7 +139,7 @@ unset($__errorArgs, $__bag); ?>
                             </div>
                         </div>
 
-                        <!-- Hotel Fields -->
+                        <!-- Campos de Hotel -->
                         <div id="hotel-fields" style="display:none;">
                             <div class="mb-3">
                                 <label for="usuario" class="form-label">Usuario</label>
@@ -191,7 +191,7 @@ unset($__errorArgs, $__bag); ?>
                             </div>
                         </div>
 
-                        <!-- Common Fields -->
+                        <!-- Campos Comunes -->
                         <div class="mb-3">
                             <label for="password" class="form-label">Contraseña</label>
                             <input type="password" class="form-control <?php $__errorArgs = ['password'];
@@ -225,7 +225,7 @@ unset($__errorArgs, $__bag); ?>
                     <hr>
 
                     <p class="text-center mb-0">
-                        ¿Ya tienes cuenta? <a href="<?php echo e(route('login')); ?>">Login aquí</a>
+                                                ¿Ya tienes cuenta? <a href="<?php echo e(route('login')); ?>">Inicia sesión aquí</a>
                     </p>
                 </div>
             </div>

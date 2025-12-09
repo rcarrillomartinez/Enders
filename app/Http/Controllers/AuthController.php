@@ -115,8 +115,6 @@ class AuthController extends Controller
         switch ($userType) {
             case 'viajero':
                 return $this->registerViajero($request);
-            case 'hotel':
-                return $this->registerHotel($request);
             default:
                 return back()->withErrors(['Tipo de usuario inválido']);
         }

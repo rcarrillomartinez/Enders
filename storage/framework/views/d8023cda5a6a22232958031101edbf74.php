@@ -1,6 +1,6 @@
 
 
-<?php $__env->startSection('title', 'Login'); ?>
+<?php $__env->startSection('title', 'Iniciar Sesión'); ?>
 
 <?php $__env->startSection('content'); ?>
     <div class="row justify-content-center">
@@ -106,7 +106,7 @@ endif;
 unset($__errorArgs, $__bag); ?>
                         </div>
 
-                        <button type="submit" class="btn btn-primary w-100">Login</button>
+                        <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
                     </form>
 
                     <hr>
