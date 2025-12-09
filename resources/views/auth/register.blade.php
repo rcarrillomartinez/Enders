@@ -13,17 +13,7 @@
                     <form action="{{ route('auth.register.post') }}" method="POST">
                         @csrf
 
-                        <div class="mb-3">
-                            <label for="user_type" class="form-label">Tipo de Usuario</label>
-                            <select class="form-select @error('user_type') is-invalid @enderror" id="user_type" name="user_type" required>
-                                <option value="">Selecciona un tipo</option>
-                                <option value="viajero">Viajero</option>
-                                <option value="hotel">Hotel</option>
-                            </select>
-                            @error('user_type')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+                        <input type="hidden" name="user_type" value="viajero">
 
                         <!-- Campos de Viajero -->
                         <div id="viajero-fields" style="display:none;">
@@ -83,29 +73,6 @@
                             </div>
                         </div>
 
-                        <!-- Campos de Hotel -->
-                        <div id="hotel-fields" style="display:none;">
-                            <div class="mb-3">
-                                <label for="usuario" class="form-label">Usuario</label>
-                                <input type="text" class="form-control @error('usuario') is-invalid @enderror" id="usuario" name="usuario">
-                                @error('usuario')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="nombre_hotel" class="form-label">Nombre del Hotel</label>
-                                <input type="text" class="form-control @error('nombre_hotel') is-invalid @enderror" id="nombre_hotel" name="nombre_hotel">
-                                @error('nombre_hotel')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="id_zona" class="form-label">Zona</label>
-                                <input type="number" class="form-control" id="id_zona" name="id_zona">
-                            </div>
-                        </div>
 
                         <!-- Campos Comunes -->
                         <div class="mb-3">
@@ -136,10 +103,8 @@
 
     @section('scripts')
         <script>
-            document.getElementById('user_type').addEventListener('change', function() {
-                document.getElementById('viajero-fields').style.display = this.value === 'viajero' ? 'block' : 'none';
-                document.getElementById('hotel-fields').style.display = this.value === 'hotel' ? 'block' : 'none';
-            });
+            // No hotel registration option on public form; show viajero fields by default
+            document.getElementById('viajero-fields').style.display = 'block';
         </script>
     @endsection
 @endsection

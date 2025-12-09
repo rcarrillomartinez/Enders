@@ -8,6 +8,9 @@
             <h2>Mis Reservas</h2>
         </div>
         <div class="col-auto">
+            <?php if(session('user_type') === 'admin'): ?>
+                <a href="<?php echo e(route('admin.hotels.create')); ?>" class="btn btn-secondary">Crear hotel</a>
+            <?php endif; ?>
             <?php if(session('user_type') !== 'hotel'): ?>
                 <a href="<?php echo e(route('reservas.create')); ?>" class="btn btn-primary">Nueva Reserva</a>
             <?php endif; ?>

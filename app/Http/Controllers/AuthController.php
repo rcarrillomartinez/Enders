@@ -121,6 +121,44 @@ class AuthController extends Controller
     }
 
     /**
+     * Mostrar formulario de creación de hotel (solo admin)
+     */
+    public function showHotelCreate()
+    {
+        if (!Auth::guard('admin')->check()) {
+            abort(403);
+        }
+
+        return view('auth.hotel_register');
+    }
+
+    /**
+     * Almacenar nuevo hotel creado por admin
+     */
+    public function storeHotel(Request $request)
+    {
+        if (!Auth::guard('admin')->check()) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'usuario' => 'required|string|unique:tranfer_hotel,usuario',
+            'nombre_hotel' => 'required|string',
+            'id_zona' => 'nullable|integer',
+            'password' => 'required|min:6|confirmed',
+        ]);
+
+        $hotel = Hotel::create([
+            'usuario' => $validated['usuario'],
+            'nombre_hotel' => $validated['nombre_hotel'],
+            'id_zona' => $validated['id_zona'] ?? null,
+            'password' => Hash::make($validated['password']),
+        ]);
+
+        return redirect()->route('profile.show')->with('success', 'Hotel creado correctamente');
+    }
+
+    /**
      * Registrar un nuevo viajero
      */
     private function registerViajero(Request $request)

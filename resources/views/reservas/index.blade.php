@@ -8,6 +8,9 @@
             <h2>Mis Reservas</h2>
         </div>
         <div class="col-auto">
+            @if (session('user_type') === 'admin')
+                <a href="{{ route('admin.hotels.create') }}" class="btn btn-secondary">Crear hotel</a>
+            @endif
             @if (session('user_type') !== 'hotel')
                 <a href="{{ route('reservas.create') }}" class="btn btn-primary">Nueva Reserva</a>
             @endif

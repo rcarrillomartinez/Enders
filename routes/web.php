@@ -28,6 +28,10 @@ Route::middleware('CheckMultiGuardAuth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
+    // Admin-only hotel creation (form + store). Methods validate admin guard internally.
+    Route::get('/admin/hotels/create', [AuthController::class, 'showHotelCreate'])->name('admin.hotels.create');
+    Route::post('/admin/hotels', [AuthController::class, 'storeHotel'])->name('admin.hotels.store');
+
     /**
      * Rutas de Reservas de Transfer
      */
