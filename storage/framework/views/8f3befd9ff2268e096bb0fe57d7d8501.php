@@ -54,9 +54,6 @@
                                 <label for="nombre" class="form-label">Nombre</label>
                                 <input type="text" class="form-control" id="nombre" name="nombre" value="<?php echo e($user->nombre ?? ''); ?>">
                             </div>
-                            <div class="mt-3">
-                                <a href="<?php echo e(route('admin.hotels.create')); ?>" class="btn btn-secondary">Crear hotel</a>
-                            </div>
                         <?php endif; ?>
 
                         <hr>

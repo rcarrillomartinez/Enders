@@ -54,6 +54,8 @@
                                 <label for="nombre" class="form-label">Nombre</label>
                                 <input type="text" class="form-control" id="nombre" name="nombre" value="{{ $user->nombre ?? '' }}">
                             </div>
+
+                            <hr>
                         @endif
 
                         <hr>

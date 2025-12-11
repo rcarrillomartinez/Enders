@@ -27,12 +27,25 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <?php if(Auth::guard('viajero')->check() || Auth::guard('hotel')->check() || Auth::guard('admin')->check()): ?>
+                    <?php if(Auth::guard('viajero')->check() || Auth::guard('admin')->check()): ?>
                         <li class="nav-item">
                             <a class="nav-link" href="<?php echo e(route('reservas.index')); ?>">Reservas</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="<?php echo e(route('reservas.calendar')); ?>">Calendario</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="<?php echo e(route('profile.show')); ?>">Perfil</a>
+                        </li>
+                        <li class="nav-item">
+                            <form action="<?php echo e(route('auth.logout')); ?>" method="POST" class="d-inline">
+                                <?php echo csrf_field(); ?>
+                                <button type="submit" class="nav-link btn btn-link">Cerrar sesión</button>
+                            </form>
+                        </li>
+                    <?php elseif(Auth::guard('hotel')->check()): ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="<?php echo e(route('hotel.dashboard')); ?>">Panel de Hotel</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="<?php echo e(route('profile.show')); ?>">Perfil</a>

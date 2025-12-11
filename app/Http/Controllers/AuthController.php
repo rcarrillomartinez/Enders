@@ -65,6 +65,11 @@ class AuthController extends Controller
             return back()->withErrors(['email' => 'Credenciales inválidas'])->withInput();
         }
 
+        // Logout all other guards first
+        Auth::guard('hotel')->logout();
+        Auth::guard('admin')->logout();
+        Auth::guard('web')->logout();
+
         Auth::guard('viajero')->login($viajero);
         session(['user_type' => 'viajero', 'user_id' => $viajero->id_viajero, 'user_email' => $viajero->email]);
 
@@ -82,10 +87,16 @@ class AuthController extends Controller
             return back()->withErrors(['usuario' => 'Credenciales inválidas'])->withInput();
         }
 
+        // Logout all other guards first
+        Auth::guard('viajero')->logout();
+        Auth::guard('admin')->logout();
+        Auth::guard('web')->logout();
+
         Auth::guard('hotel')->login($hotel);
         session(['user_type' => 'hotel', 'user_id' => $hotel->id_hotel, 'user_name' => $hotel->usuario]);
 
-        return redirect()->route('reservas.index');
+        // Redirect hotels to their dedicated dashboard
+        return redirect()->route('hotel.dashboard');
     }
 
     /**
@@ -98,6 +109,11 @@ class AuthController extends Controller
         if (!$admin || !Hash::check($password, $admin->password)) {
             return back()->withErrors(['email' => 'Credenciales inválidas'])->withInput();
         }
+
+        // Logout all other guards first
+        Auth::guard('viajero')->logout();
+        Auth::guard('hotel')->logout();
+        Auth::guard('web')->logout();
 
         Auth::guard('admin')->login($admin);
         session(['user_type' => 'admin', 'user_id' => $admin->id_admin, 'user_email' => $admin->email]);
@@ -190,7 +206,7 @@ class AuthController extends Controller
         Auth::guard('viajero')->login($viajero);
         session(['user_type' => 'viajero', 'user_id' => $viajero->id_viajero, 'user_email' => $viajero->email]);
 
-        return redirect()->route('reservas.index')->with('success', '\u00a1Registro exitoso!');
+        return redirect()->route('reservas.index')->with('success', 'Registro exitoso!');
     }
 
     /**
@@ -215,7 +231,7 @@ class AuthController extends Controller
         Auth::guard('hotel')->login($hotel);
         session(['user_type' => 'hotel', 'user_id' => $hotel->id_hotel, 'user_name' => $hotel->usuario]);
 
-        return redirect()->route('reservas.index')->with('success', '\u00a1Registro exitoso!');
+        return redirect()->route('reservas.index')->with('success', 'Registro exitoso!');
     }
 
     /**
@@ -223,10 +239,15 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
+        // Logout from all guards
+        Auth::guard('viajero')->logout();
+        Auth::guard('hotel')->logout();
+        Auth::guard('admin')->logout();
         Auth::logout();
+        
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login')->with('success', 'Sesi\u00f3n cerrada correctamente');
+        return redirect()->route('login')->with('success', 'Sesion cerrada correctamente');
     }
 }

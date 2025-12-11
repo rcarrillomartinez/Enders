@@ -32,6 +32,13 @@ class TransferReserva extends Model
         'apellido2_cliente',
     ];
 
+    protected $dates = [
+        'fecha_reserva',
+        'fecha_modificacion',
+        'fecha_entrada',
+        'fecha_vuelo_salida',
+    ];
+
     /**
      * Relación: Una reserva pertenece a un hotel
      */
@@ -62,5 +69,21 @@ class TransferReserva extends Model
     public static function generateLocalizador(): string
     {
         return 'TR-' . strtoupper(substr(md5(uniqid(rand(), true)), 0, 8));
+    }
+
+    /**
+     * Compute commission for this reservation.
+     * Commission rules: 10€ per service. If tipo_reserva indicates both directions (id 3), it's 2 services.
+     */
+    public function commission(): float
+    {
+        $services = 1;
+        if ($this->id_tipo_reserva) {
+            if ((int)$this->id_tipo_reserva === 3) {
+                $services = 2;
+            }
+        }
+
+        return 10.0 * $services;
     }
 }
