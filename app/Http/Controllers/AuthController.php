@@ -169,6 +169,7 @@ class AuthController extends Controller
             'nombre_hotel' => $validated['nombre_hotel'],
             'id_zona' => $validated['id_zona'] ?? null,
             'password' => Hash::make($validated['password']),
+            'comision' => 10,
         ]);
 
         return redirect()->route('profile.show')->with('success', 'Hotel creado correctamente');
@@ -226,6 +227,7 @@ class AuthController extends Controller
             'nombre_hotel' => $validated['nombre_hotel'],
             'id_zona' => $validated['id_zona'] ?? null,
             'password' => Hash::make($validated['password']),
+            'comision' => 10,
         ]);
 
         Auth::guard('hotel')->login($hotel);

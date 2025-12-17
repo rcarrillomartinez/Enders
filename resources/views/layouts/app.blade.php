@@ -34,6 +34,11 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('reservas.calendar') }}">Calendario</a>
                         </li>
+                        @if (session('user_type') === 'admin')
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('admin.hotels.list') }}">Hoteles</a>
+                            </li>
+                        @endif
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('profile.show') }}">Perfil</a>
                         </li>
@@ -77,6 +82,13 @@
         @if (session('success'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         @endif

@@ -33,6 +33,11 @@
                                             <a href="<?php echo e(route('admin.hotels.reservas', $hotel->id_hotel)); ?>" class="btn btn-sm btn-primary">
                                                 Ver Reservas
                                             </a>
+                                            <form action="<?php echo e(route('admin.hotels.destroy', $hotel->id_hotel)); ?>" method="POST" class="d-inline" onsubmit="return confirm('¿Seguro que deseas eliminar este hotel y todos sus datos relacionados?');">
+                                                <?php echo csrf_field(); ?>
+                                                <?php echo method_field('DELETE'); ?>
+                                                <button class="btn btn-sm btn-danger">Eliminar</button>
+                                            </form>
                                         </td>
                                     </tr>
                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>

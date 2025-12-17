@@ -15,7 +15,6 @@ class PreciosSeeder extends Seeder
             ['id_vehiculo' => 1, 'id_hotel' => 1, 'precio' => 25],
             ['id_vehiculo' => 2, 'id_hotel' => 1, 'precio' => 35],
             ['id_vehiculo' => 3, 'id_hotel' => 2, 'precio' => 50],
-            // add a few more combinations
             ['id_vehiculo' => 1, 'id_hotel' => 2, 'precio' => 30],
             ['id_vehiculo' => 2, 'id_hotel' => 3, 'precio' => 45],
         ];

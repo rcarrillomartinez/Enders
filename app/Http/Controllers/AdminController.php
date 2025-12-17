@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\TransferReserva;
 use App\Models\Hotel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class AdminController extends Controller
 {
@@ -43,5 +46,50 @@ class AdminController extends Controller
             });
 
         return view('admin.hotel_reservas', compact('hotel', 'reservas', 'monthly'));
+    }
+
+    // Delete a hotel and its related data
+    public function destroyHotel($hotelId)
+    {
+        if (!auth('admin')->check()) {
+            abort(403);
+        }
+
+        $hotel = Hotel::findOrFail($hotelId);
+
+        Log::info('Attempting to delete hotel', ['id' => $hotel->id_hotel, 'usuario' => $hotel->usuario]);
+
+        try {
+            DB::transaction(function () use ($hotel) {
+                // Delete reservations
+                TransferReserva::where('id_hotel', $hotel->id_hotel)->delete();
+
+                // Delete precio records and collect vehicle ids to consider deleting
+                $vehiculoIds = [];
+                if (Schema::hasTable('transfer_precios')) {
+                    $vehiculoIds = DB::table('transfer_precios')
+                        ->where('id_hotel', $hotel->id_hotel)
+                        ->pluck('id_vehiculo')
+                        ->toArray();
+
+                    DB::table('transfer_precios')->where('id_hotel', $hotel->id_hotel)->delete();
+                }
+
+                // Delete vehicles that were associated only via precios (if any)
+                if (!empty($vehiculoIds)) {
+                    \App\Models\Vehiculo::whereIn('id_vehiculo', $vehiculoIds)->delete();
+                }
+
+                // Finally delete the hotel
+                $hotel->delete();
+            });
+
+            Log::info('Hotel deleted', ['id' => $hotel->id_hotel]);
+
+            return redirect()->route('admin.hotels.list')->with('success', 'Hotel eliminado correctamente');
+        } catch (\Exception $e) {
+            Log::error('Error deleting hotel', ['id' => $hotel->id_hotel, 'error' => $e->getMessage()]);
+            return redirect()->route('admin.hotels.list')->with('error', 'No se pudo eliminar el hotel: ' . $e->getMessage());
+        }
     }
 }

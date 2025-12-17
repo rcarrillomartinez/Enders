@@ -49,6 +49,8 @@ Route::middleware('CheckMultiGuardAuth')->group(function () {
 
     // Admin: view reservations for a specific hotel and monthly totals
     Route::get('/admin/hotels/{hotel}/reservas', [AdminController::class, 'hotelReservations'])->name('admin.hotels.reservas');
+    // Admin: delete a hotel
+    Route::delete('/admin/hotels/{hotel}', [AdminController::class, 'destroyHotel'])->name('admin.hotels.destroy');
 
     /**
      * Rutas de Reservas de Transfer

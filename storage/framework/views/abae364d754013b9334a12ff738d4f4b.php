@@ -34,6 +34,11 @@
                         <li class="nav-item">
                             <a class="nav-link" href="<?php echo e(route('reservas.calendar')); ?>">Calendario</a>
                         </li>
+                        <?php if(session('user_type') === 'admin'): ?>
+                            <li class="nav-item">
+                                <a class="nav-link" href="<?php echo e(route('admin.hotels.list')); ?>">Hoteles</a>
+                            </li>
+                        <?php endif; ?>
                         <li class="nav-item">
                             <a class="nav-link" href="<?php echo e(route('profile.show')); ?>">Perfil</a>
                         </li>
@@ -77,6 +82,14 @@
         <?php if(session('success')): ?>
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <?php echo e(session('success')); ?>
+
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <?php endif; ?>
+
+        <?php if(session('error')): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <?php echo e(session('error')); ?>
 
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
