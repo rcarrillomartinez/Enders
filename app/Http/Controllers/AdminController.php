@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Schema;
 
 class AdminController extends Controller
 {
-    // List all hotels for admin to choose from
     public function listHotels()
     {
         if (!auth('admin')->check()) {
@@ -22,7 +21,6 @@ class AdminController extends Controller
         return view('admin.hotels_list', compact('hotels'));
     }
 
-    // List reservations for a hotel, ordered by commission
     public function hotelReservations($hotelId)
     {
         $hotel = Hotel::findOrFail($hotelId);
@@ -31,7 +29,6 @@ class AdminController extends Controller
             return $r->commission();
         });
 
-        // Calculate total commission per month for this hotel
         $monthly = TransferReserva::where('id_hotel', $hotelId)
             ->get()
             ->groupBy(function ($item) {
@@ -48,7 +45,6 @@ class AdminController extends Controller
         return view('admin.hotel_reservas', compact('hotel', 'reservas', 'monthly'));
     }
 
-    // Delete a hotel and its related data
     public function destroyHotel($hotelId)
     {
         if (!auth('admin')->check()) {
@@ -61,10 +57,9 @@ class AdminController extends Controller
 
         try {
             DB::transaction(function () use ($hotel) {
-                // Delete reservations
+
                 TransferReserva::where('id_hotel', $hotel->id_hotel)->delete();
 
-                // Delete precio records and collect vehicle ids to consider deleting
                 $vehiculoIds = [];
                 if (Schema::hasTable('transfer_precios')) {
                     $vehiculoIds = DB::table('transfer_precios')
@@ -75,12 +70,10 @@ class AdminController extends Controller
                     DB::table('transfer_precios')->where('id_hotel', $hotel->id_hotel)->delete();
                 }
 
-                // Delete vehicles that were associated only via precios (if any)
                 if (!empty($vehiculoIds)) {
                     \App\Models\Vehiculo::whereIn('id_vehiculo', $vehiculoIds)->delete();
                 }
 
-                // Finally delete the hotel
                 $hotel->delete();
             });
 

@@ -63,7 +63,7 @@
                                     <option value="">Selecciona un vehículo</option>
                                     @foreach ($vehiculos as $vehiculo)
                                         <option value="{{ $vehiculo->id_vehiculo }}" {{ $reserva->id_vehiculo == $vehiculo->id_vehiculo ? 'selected' : '' }}>
-                                            {{ $vehiculo->tipo_vehiculo }} - {{ $vehiculo->matricula }}
+                                            {{ $vehiculo->descripcion }} @if(isset($vehiculo->capacidad)) (capacidad: {{ $vehiculo->capacidad }}) @endif
                                         </option>
                                     @endforeach
                                 </select>

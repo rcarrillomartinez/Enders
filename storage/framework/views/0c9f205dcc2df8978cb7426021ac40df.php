@@ -236,8 +236,7 @@ unset($__errorArgs, $__bag); ?>
                                     <option value="">Selecciona un vehículo</option>
                                     <?php $__currentLoopData = $vehiculos; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $vehiculo): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <option value="<?php echo e($vehiculo->id_vehiculo); ?>" <?php echo e(old('id_vehiculo') == $vehiculo->id_vehiculo ? 'selected' : ''); ?>>
-                                            <?php echo e($vehiculo->tipo_vehiculo); ?> - <?php echo e($vehiculo->matricula); ?>
-
+                                            <?php echo e($vehiculo->descripcion); ?> <?php if(isset($vehiculo->capacidad)): ?> (capacidad: <?php echo e($vehiculo->capacidad); ?>) <?php endif; ?>
                                         </option>
                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </select>

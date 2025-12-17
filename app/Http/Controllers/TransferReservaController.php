@@ -44,13 +44,12 @@ class TransferReservaController extends Controller
         $hotels = Hotel::all();
         $vehiculos = Vehiculo::all();
         $tiposReserva = TipoReserva::all();
-        $destinos = Destino::all();
+        
 
         return view('reservas.create', [
             'hotels' => $hotels,
             'vehiculos' => $vehiculos,
             'tiposReserva' => $tiposReserva,
-            'destinos' => $destinos,
         ]);
     }
 
@@ -97,7 +96,7 @@ class TransferReservaController extends Controller
         ]);
 
         return redirect()->route('reservas.show', $reserva->id_reserva)
-            ->with('success', '\u00a1Reserva creada correctamente!');
+            ->with('success', 'Reserva creada correctamente!');
     }
 
     /**
@@ -122,6 +121,32 @@ class TransferReservaController extends Controller
         // Solo los administradores pueden editar
         if (session('user_type') !== 'admin') {
             return back()->withErrors(['Acceso no autorizado']);
+        }
+
+        $hotels = Hotel::all();
+        $vehiculos = Vehiculo::all();
+        $tiposReserva = TipoReserva::all();
+        return view('reservas.show', [
+            'reserva' => $reserva,
+            'hotels' => $hotels,
+            'vehiculos' => $vehiculos,
+            'tiposReserva' => $tiposReserva,
+        ]);
+    }
+
+    /**
+     * Mostrar el formulario de edición de una reserva
+     */
+    public function edit($id)
+    {
+        if (session('user_type') !== 'admin') {
+            return back()->withErrors(['Acceso no autorizado']);
+        }
+
+        $reserva = TransferReserva::find($id);
+
+        if (!$reserva) {
+            return back()->withErrors(['Reserva no encontrada']);
         }
 
         $hotels = Hotel::all();
