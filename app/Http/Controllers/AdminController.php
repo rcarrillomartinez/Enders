@@ -92,4 +92,34 @@ class AdminController extends Controller
             return redirect()->route('admin.hotels.list')->with('error', 'No se pudo eliminar el hotel: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Devuelve un JSON con el número de traslados por zona y el % del total
+     */
+    public function reservasPorZona(Request $request)
+    {
+        $data = DB::table('transfer_zona as z')
+            ->leftJoin('tranfer_hotel as h', 'h.id_zona', '=', 'z.id_zona')
+            ->leftJoin('transfer_reservas as r', 'r.id_hotel', '=', 'h.id_hotel')
+            ->select('z.id_zona', 'z.descripcion', DB::raw('COUNT(r.id_reserva) as traslados'))
+            ->groupBy('z.id_zona', 'z.descripcion')
+            ->get();
+
+        $total = $data->sum('traslados');
+
+        $result = $data->map(function ($row) use ($total) {
+            $pct = $total ? round(((int)$row->traslados / $total) * 100, 2) : 0;
+            return [
+                'id_zona' => $row->id_zona,
+                'descripcion' => $row->descripcion,
+                'traslados' => (int)$row->traslados,
+                'porcentaje' => $pct,
+            ];
+        });
+
+        return response()->json([
+            'total_reservas' => (int)$total,
+            'zonas' => $result,
+        ]);
+    }
 }

@@ -65,3 +65,6 @@ Route::middleware('CheckMultiGuardAuth')->group(function () {
 Route::get('/', function () {
     return redirect()->route('login');
 })->name('home');
+
+// Endpoint para obtener reservas agregadas por zona
+Route::get('/api/reservas-zona', [AdminController::class, 'reservasPorZona'])->name('reservas.zona');
