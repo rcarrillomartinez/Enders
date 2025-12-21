@@ -24,6 +24,7 @@ class TransferReserva extends Model
         'origen_vuelo_entrada',
         'fecha_vuelo_salida',
         'hora_partida',
+        'numero_vuelo_salida', 
         'num_viajeros',
         'id_vehiculo',
         'estado',

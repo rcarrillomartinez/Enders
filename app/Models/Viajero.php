@@ -23,6 +23,7 @@ class Viajero extends Authenticatable
         'ciudad',
         'pais',
         'password',
+        'foto'
     ];
 
     protected $hidden = [

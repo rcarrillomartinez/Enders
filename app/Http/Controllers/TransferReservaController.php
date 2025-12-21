@@ -78,6 +78,7 @@ class TransferReservaController extends Controller
             'origen_vuelo_entrada' => 'nullable|string',
             'fecha_vuelo_salida' => 'nullable|date',
             'hora_partida' => 'nullable',
+            'numero_vuelo_salida' => 'nullable|string', 
             'num_viajeros' => 'required|integer|min:1',
             'id_vehiculo' => 'required|exists:transfer_vehiculo,id_vehiculo',
             'estado' => 'nullable|in:pendiente,confirmada,cancelada,completada',
@@ -151,6 +152,9 @@ class TransferReservaController extends Controller
             'estado' => 'required|in:pendiente,confirmada,cancelada,completada',
             'num_viajeros' => 'required|integer|min:1',
             'id_vehiculo' => 'required|exists:transfer_vehiculo,id_vehiculo',
+            'fecha_vuelo_salida' => 'nullable|date',
+            'hora_partida' => 'nullable',
+            'numero_vuelo_salida' => 'nullable|string', 
         ]);
 
         $reserva->update($validated);

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage; 
 
 class ProfileController extends Controller
 {
@@ -13,11 +14,9 @@ class ProfileController extends Controller
      */
     public function show()
     {
-        $user = Auth::user();
         $userType = session('user_type');
         $userId = session('user_id');
 
-        // Obtener el modelo de usuario apropiado según el tipo
         $profileData = match ($userType) {
             'viajero' => \App\Models\Viajero::find($userId),
             'hotel' => \App\Models\Hotel::find($userId),
@@ -25,7 +24,27 @@ class ProfileController extends Controller
             default => null,
         };
 
-        return view('profile.show', ['user' => $profileData, 'userType' => $userType]);
+        // Definimos los campos para el cálculo de progreso
+        // Incluimos 'foto' para que también sume puntos
+        $campos = ['email', 'nombre', 'apellido1', 'ciudad', 'password', 'foto'];
+        $llenos = 0;
+
+        if ($profileData) {
+            foreach ($campos as $campo) {
+                if (!empty($profileData->$campo)) {
+                    $llenos++;
+                }
+            }
+            $porcentaje = ($llenos / count($campos)) * 100;
+        } else {
+            $porcentaje = 0;
+        }
+
+        return view('profile.show', [
+            'user' => $profileData, 
+            'userType' => $userType,
+            'porcentaje' => $porcentaje
+        ]);
     }
 
     /**
@@ -38,44 +57,48 @@ class ProfileController extends Controller
 
         $user = match ($userType) {
             'viajero' => \App\Models\Viajero::find($userId),
-            'hotel' => \App\Models\Hotel::find($userId),
-            'admin' => \App\Models\Admin::find($userId),
-            default => null,
+            'hotel'   => \App\Models\Hotel::find($userId),
+            'admin'   => \App\Models\Admin::find($userId),
+            default   => null,
         };
 
-        if (!$user) {
-            return back()->withErrors(['Usuario no encontrado']);
-        }
+        if (!$user) return back()->withErrors(['Usuario no encontrado']);
 
-        $validated = $request->validate([
-            'email' => 'nullable|email|unique:transfer_viajeros,email,' . $userId . ',id_viajero',
-            'nombre' => 'nullable|string',
-            'nombre_hotel' => 'nullable|string',
-            'new_password' => 'nullable|min:6',
-            'password_confirmation' => 'nullable|same:new_password',
+        // Validamos
+        $request->validate([
+            'foto' => 'nullable|image|max:2048',
+            'email' => 'required|string', // Este campo viene del input del form
+            'new_password' => 'nullable|min:8|confirmed',
         ]);
 
-        $updateData = [];
-
-        if ($request->filled('nombre')) {
-            $updateData['nombre'] = $validated['nombre'];
+        // 1. Manejo de la FOTO
+        if ($request->hasFile('foto')) {
+            if ($user->foto) {
+                \Storage::disk('public')->delete($user->foto);
+            }
+            $user->foto = $request->file('foto')->store('avatars', 'public');
         }
 
-        if ($request->filled('nombre_hotel')) {
-            $updateData['nombre_hotel'] = $validated['nombre_hotel'];
+        // 2. Manejo de Datos según tipo (Mapeo de columnas real)
+        if ($userType === 'hotel') {
+            $user->usuario = $request->email; // En hoteles la columna se llama 'usuario'
+            $user->nombre_hotel = $request->nombre_hotel;
+        } else {
+            $user->email = $request->email; // En admin/viajero se llama 'email'
+            $user->nombre = $request->nombre;
+            if ($userType === 'viajero') {
+                $user->apellido1 = $request->apellido1;
+                $user->ciudad = $request->ciudad;
+            }
         }
 
-        if ($request->filled('email')) {
-            $updateData['email'] = $validated['email'];
-            session(['user_email' => $validated['email']]);
-        }
-
+        // 3. Contraseña
         if ($request->filled('new_password')) {
-            $updateData['password'] = Hash::make($validated['new_password']);
+            $user->password = \Hash::make($request->new_password);
         }
 
-        $user->update($updateData);
+        $user->save();
 
-        return redirect()->route('profile.show')->with('success', '\u00a1Perfil actualizado correctamente!');
+        return redirect()->route('profile.show')->with('success', 'Perfil actualizado');
     }
 }
