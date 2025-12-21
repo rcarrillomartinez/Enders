@@ -3,6 +3,7 @@
 /node_modules/
 /.phan/
 /build/
+storage
 
 # Laravel Environment
 .env
