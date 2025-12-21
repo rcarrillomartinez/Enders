@@ -82,7 +82,15 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <h6 class="text-muted">Vehículo</h6>
-                            <p>{{ $reserva->vehiculo->tipo_vehiculo ?? 'N/A' }} ({{ $reserva->vehiculo->matricula ?? 'N/A' }})</p>
+                            <p>
+                                @if($reserva->vehiculo)
+                                    {{-- Usamos 'descripcion' que es el nombre real en tu BD --}}
+                                    {{ $reserva->vehiculo->descripcion }}
+                                    <br>
+                                @else
+                                    <span class="text-danger">No asignado</span>
+                                @endif
+                            </p>
                         </div>
                     </div>
 
