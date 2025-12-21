@@ -6,56 +6,54 @@ use App\Models\TransferReserva;
 use App\Models\Hotel;
 use App\Models\Vehiculo;
 use App\Models\TipoReserva;
-use App\Models\Destino;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class TransferReservaController extends Controller
 {
     /**
-     * Mostrar todas las reservas
+     * Asegura que solo usuarios autenticados accedan.
      */
-    public function index()
+    public function __construct()
     {
-        $userType = session('user_type');
-        $userId = session('user_id');
-        $userEmail = session('user_email');
-
-        // Filtrar reservas según el tipo de usuario
-        if ($userType === 'admin') {
-            $reservas = TransferReserva::with('hotel', 'tipoReserva', 'vehiculo')
-                ->orderBy('fecha_entrada', 'desc')
-                ->paginate(15);
-        } else {
-            $reservas = TransferReserva::where('email_cliente', $userEmail)
-                ->with('hotel', 'tipoReserva', 'vehiculo')
-                ->orderBy('fecha_entrada', 'desc')
-                ->paginate(15);
-        }
-
-        return view('reservas.index', ['reservas' => $reservas, 'userType' => $userType]);
+        $this->middleware('CheckMultiGuardAuth');
     }
 
-    /**
-     * Mostrar el formulario para crear una nueva reserva
-     */
+    public function index()
+    {
+        $user = Auth::user();
+        // Fallback para determinar el tipo de usuario y el email
+        $userType = session('user_type') ?? ($user->role ?? 'client');
+        $userEmail = session('user_email') ?? $user->email;
+
+        $query = TransferReserva::with(['hotel', 'tipoReserva', 'vehiculo']);
+
+        if ($userType !== 'admin') {
+            $query->where('email_cliente', $userEmail);
+        }
+
+        $reservas = $query->orderBy('fecha_entrada', 'desc')->paginate(15);
+
+        return view('reservas.index', compact('reservas', 'userType'));
+    }
+
     public function create()
     {
         $hotels = Hotel::all();
         $vehiculos = Vehiculo::all();
         $tiposReserva = TipoReserva::all();
-        
+        $authUser = Auth::user();
 
-        return view('reservas.create', [
-            'hotels' => $hotels,
-            'vehiculos' => $vehiculos,
-            'tiposReserva' => $tiposReserva,
-        ]);
+        $userData = [
+            'email'    => old('email_cliente', session('user_email') ?? $authUser->email ?? ''),
+            'nombre'   => old('nombre_cliente', session('user_nombre') ?? $authUser->name ?? ''),
+            'apellido' => old('apellido1_cliente', session('user_apellido') ?? $authUser->apellido ?? ''),
+        ];
+
+        return view('reservas.create', compact('hotels', 'vehiculos', 'tiposReserva', 'userData'));
     }
 
-    /**
-     * Almacenar una nueva reserva creada
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -66,181 +64,111 @@ class TransferReservaController extends Controller
             'apellido1_cliente' => 'required|string',
             'apellido2_cliente' => 'nullable|string',
             'fecha_entrada' => 'nullable|date',
-            'hora_entrada' => 'nullable|date_format:H:i',
+            'hora_entrada' => 'nullable',
             'numero_vuelo_entrada' => 'nullable|string',
             'origen_vuelo_entrada' => 'nullable|string',
             'fecha_vuelo_salida' => 'nullable|date',
-            'hora_partida' => 'nullable|date_format:H:i',
-            'num_viajeros' => 'nullable|integer',
-            'id_vehiculo' => 'nullable|exists:transfer_vehiculo,id_vehiculo',
+            'hora_partida' => 'nullable',
+            'num_viajeros' => 'required|integer|min:1',
+            'id_vehiculo' => 'required|exists:transfer_vehiculo,id_vehiculo',
             'estado' => 'nullable|in:pendiente,confirmada,cancelada,completada',
         ]);
 
-        $reserva = TransferReserva::create([
-            'localizador' => TransferReserva::generateLocalizador(),
-            'id_hotel' => $validated['id_hotel'],
-            'id_tipo_reserva' => $validated['id_tipo_reserva'],
-            'email_cliente' => $validated['email_cliente'],
-            'nombre_cliente' => $validated['nombre_cliente'],
-            'apellido1_cliente' => $validated['apellido1_cliente'],
-            'apellido2_cliente' => $validated['apellido2_cliente'] ?? null,
-            'fecha_entrada' => $validated['fecha_entrada'] ?? null,
-            'hora_entrada' => $validated['hora_entrada'] ?? null,
-            'numero_vuelo_entrada' => $validated['numero_vuelo_entrada'] ?? null,
-            'origen_vuelo_entrada' => $validated['origen_vuelo_entrada'] ?? null,
-            'fecha_vuelo_salida' => $validated['fecha_vuelo_salida'] ?? null,
-            'hora_partida' => $validated['hora_partida'] ?? null,
-            'num_viajeros' => $validated['num_viajeros'] ?? null,
-            'id_vehiculo' => $validated['id_vehiculo'] ?? null,
-            'estado' => $validated['estado'] ?? 'pendiente',
-        ]);
+        $reserva = new TransferReserva();
+        $reserva->fill($validated);
+        
+        $reserva->localizador = TransferReserva::generateLocalizador();
+        $reserva->fecha_reserva = now();
+        $reserva->estado = $request->estado ?? 'pendiente';
+        
+        $reserva->save();
 
-        return redirect()->route('reservas.show', $reserva->id_reserva)
-            ->with('success', 'Reserva creada correctamente!');
+        return redirect()->route('reservas.show', ['reserva' => $reserva->id_reserva])
+            ->with('success', '¡Reserva creada! Localizador: ' . $reserva->localizador);
     }
 
-    /**
-     * Mostrar una reserva específica
-     */
     public function show($id)
     {
-        $reserva = TransferReserva::with('hotel', 'tipoReserva', 'vehiculo')->find($id);
+        $reserva = TransferReserva::with(['hotel', 'tipoReserva', 'vehiculo'])->findOrFail($id);
+        
+        $user = Auth::user();
+        $userType = session('user_type') ?? ($user->role ?? 'client');
+        $userEmail = session('user_email') ?? $user->email;
 
-        if (!$reserva) {
-            return back()->withErrors(['Reservation not found']);
-        }
-
-        // Verificar permiso
-        $userType = session('user_type');
-        $userEmail = session('user_email');
-
+        // Validación de propiedad
         if ($userType !== 'admin' && $reserva->email_cliente !== $userEmail) {
-            return back()->withErrors(['Reserva no encontrada']);
+            return redirect()->route('reservas.index')->withErrors(['No tienes permiso para ver esta reserva.']);
         }
 
-        // Solo los administradores pueden editar
-        if (session('user_type') !== 'admin') {
-            return back()->withErrors(['Acceso no autorizado']);
-        }
-
-        $hotels = Hotel::all();
-        $vehiculos = Vehiculo::all();
-        $tiposReserva = TipoReserva::all();
-        return view('reservas.show', [
-            'reserva' => $reserva,
-            'hotels' => $hotels,
-            'vehiculos' => $vehiculos,
-            'tiposReserva' => $tiposReserva,
-        ]);
+        return view('reservas.show', compact('reserva', 'userType'));
     }
 
-    /**
-     * Mostrar el formulario de edición de una reserva
-     */
     public function edit($id)
     {
-        if (session('user_type') !== 'admin') {
-            return back()->withErrors(['Acceso no autorizado']);
+        if ((session('user_type') ?? Auth::user()->role) !== 'admin') {
+            return redirect()->route('reservas.index')->withErrors(['Acceso denegado.']);
         }
 
-        $reserva = TransferReserva::find($id);
-
-        if (!$reserva) {
-            return back()->withErrors(['Reserva no encontrada']);
-        }
-
+        $reserva = TransferReserva::findOrFail($id);
         $hotels = Hotel::all();
         $vehiculos = Vehiculo::all();
         $tiposReserva = TipoReserva::all();
 
-        return view('reservas.edit', [
-            'reserva' => $reserva,
-            'hotels' => $hotels,
-            'vehiculos' => $vehiculos,
-            'tiposReserva' => $tiposReserva,
-        ]);
+        return view('reservas.edit', compact('reserva', 'hotels', 'vehiculos', 'tiposReserva'));
     }
 
-    /**
-     * Actualizar una reserva
-     */
     public function update(Request $request, $id)
     {
-        if (session('user_type') !== 'admin') {
-            return back()->withErrors(['Acceso no autorizado']);
+        if ((session('user_type') ?? Auth::user()->role) !== 'admin') {
+            abort(403);
         }
 
-        $reserva = TransferReserva::find($id);
-
-        if (!$reserva) {
-            return back()->withErrors(['Reserva no encontrada']);
-        }
+        $reserva = TransferReserva::findOrFail($id);
 
         $validated = $request->validate([
             'id_hotel' => 'required|exists:tranfer_hotel,id_hotel',
             'id_tipo_reserva' => 'required|exists:tipo_reserva,id_tipo_reserva',
             'estado' => 'required|in:pendiente,confirmada,cancelada,completada',
-            'num_viajeros' => 'nullable|integer',
-            'id_vehiculo' => 'nullable|exists:transfer_vehiculo,id_vehiculo',
+            'num_viajeros' => 'required|integer|min:1',
+            'id_vehiculo' => 'required|exists:transfer_vehiculo,id_vehiculo',
         ]);
 
         $reserva->update($validated);
+        $reserva->fecha_modificacion = now();
+        $reserva->save();
 
-        return redirect()->route('reservas.show', $id)
-            ->with('success', '\u00a1Reserva actualizada correctamente!');
+        return redirect()->route('reservas.show', ['reserva' => $id])
+            ->with('success', 'Reserva actualizada correctamente.');
     }
 
-    /**
-     * Eliminar una reserva
-     */
     public function destroy($id)
     {
-        if (session('user_type') !== 'admin') {
-            return back()->withErrors(['Acceso no autorizado']);
+        if ((session('user_type') ?? Auth::user()->role) !== 'admin') {
+            abort(403);
         }
 
-        $reserva = TransferReserva::find($id);
-
-        if (!$reserva) {
-            return back()->withErrors(['Reserva no encontrada']);
-        }
-
-        $reserva->delete();
-
-        return redirect()->route('reservas.index')
-            ->with('success', '¡Reserva eliminada correctamente!');
+        TransferReserva::findOrFail($id)->delete();
+        return redirect()->route('reservas.index')->with('success', 'Reserva eliminada.');
     }
 
-    /**
-     * Mostrar reservas en vista de calendario
-     */
     public function calendar(Request $request)
     {
-        $userType = session('user_type');
-        $userId = session('user_id');
-        $userEmail = session('user_email');
-        $viewMode = $request->query('view', 'month'); // 'día', 'semana' o 'mes'
-        $dateParam = $request->query('date'); // fecha en formato Y-m-d
-        $currentDate = $dateParam ? \Carbon\Carbon::parse($dateParam) : \Carbon\Carbon::now();
+        $user = Auth::user();
+        $userType = session('user_type') ?? ($user->role ?? 'client');
+        $userEmail = session('user_email') ?? $user->email;
+        
+        $currentDate = $request->query('date') ? Carbon::parse($request->query('date')) : Carbon::now();
 
-        // Obtener reservas para el calendario
-        if ($userType === 'admin') {
-            $reservas = TransferReserva::with('hotel', 'tipoReserva')
-                ->get();
-        } else {
-            $reservas = TransferReserva::where('email_cliente', $userEmail)
-                ->with('hotel', 'tipoReserva')
-                ->get();
+        $query = TransferReserva::with(['hotel', 'tipoReserva']);
+        if ($userType !== 'admin') {
+            $query->where('email_cliente', $userEmail);
         }
+        $reservas = $query->get();
 
-        // Agrupar reservas por fecha para mostrar en el calendario
         $calendarReservas = [];
         foreach ($reservas as $reserva) {
             if ($reserva->fecha_entrada) {
-                $date = \Carbon\Carbon::parse($reserva->fecha_entrada)->format('Y-m-d');
-                if (!isset($calendarReservas[$date])) {
-                    $calendarReservas[$date] = [];
-                }
+                $date = Carbon::parse($reserva->fecha_entrada)->format('Y-m-d');
                 $calendarReservas[$date][] = $reserva;
             }
         }
@@ -250,8 +178,7 @@ class TransferReservaController extends Controller
             'userType' => $userType,
             'currentDate' => $currentDate,
             'currentMonth' => $currentDate->copy()->startOfMonth(),
-            'viewMode' => $viewMode,
+            'viewMode' => $request->query('view', 'month'),
         ]);
     }
 }
-
