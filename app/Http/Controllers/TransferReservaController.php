@@ -13,17 +13,19 @@ use Carbon\Carbon;
 class TransferReservaController extends Controller
 {
     /**
-     * Asegura que solo usuarios autenticados accedan.
+     * Asegura que solo usuarios autenticados accedan mediante el middleware personalizado.
      */
     public function __construct()
     {
         $this->middleware('CheckMultiGuardAuth');
     }
 
+    /**
+     * Listado de reservas con filtrado por rol.
+     */
     public function index()
     {
         $user = Auth::user();
-        // Fallback para determinar el tipo de usuario y el email
         $userType = session('user_type') ?? ($user->role ?? 'client');
         $userEmail = session('user_email') ?? $user->email;
 
@@ -38,6 +40,9 @@ class TransferReservaController extends Controller
         return view('reservas.index', compact('reservas', 'userType'));
     }
 
+    /**
+     * Formulario de creación de nueva reserva.
+     */
     public function create()
     {
         $hotels = Hotel::all();
@@ -54,6 +59,10 @@ class TransferReservaController extends Controller
         return view('reservas.create', compact('hotels', 'vehiculos', 'tiposReserva', 'userData'));
     }
 
+    /**
+     * Almacenamiento de la reserva. 
+     * Se asegura que id_vehiculo se guarde correctamente.
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -77,6 +86,8 @@ class TransferReservaController extends Controller
         $reserva = new TransferReserva();
         $reserva->fill($validated);
         
+        // Aseguramos la asignación del vehículo y metadatos
+        $reserva->id_vehiculo = $validated['id_vehiculo'];
         $reserva->localizador = TransferReserva::generateLocalizador();
         $reserva->fecha_reserva = now();
         $reserva->estado = $request->estado ?? 'pendiente';
@@ -87,15 +98,18 @@ class TransferReservaController extends Controller
             ->with('success', '¡Reserva creada! Localizador: ' . $reserva->localizador);
     }
 
+    /**
+     * Muestra el detalle de la reserva con carga de relaciones.
+     */
     public function show($id)
     {
+        // Forzamos la carga de la relación vehiculo para evitar el N/A
         $reserva = TransferReserva::with(['hotel', 'tipoReserva', 'vehiculo'])->findOrFail($id);
         
         $user = Auth::user();
         $userType = session('user_type') ?? ($user->role ?? 'client');
         $userEmail = session('user_email') ?? $user->email;
 
-        // Validación de propiedad
         if ($userType !== 'admin' && $reserva->email_cliente !== $userEmail) {
             return redirect()->route('reservas.index')->withErrors(['No tienes permiso para ver esta reserva.']);
         }
@@ -103,6 +117,9 @@ class TransferReservaController extends Controller
         return view('reservas.show', compact('reserva', 'userType'));
     }
 
+    /**
+     * Edición de reserva (Solo Admin).
+     */
     public function edit($id)
     {
         if ((session('user_type') ?? Auth::user()->role) !== 'admin') {
@@ -117,6 +134,9 @@ class TransferReservaController extends Controller
         return view('reservas.edit', compact('reserva', 'hotels', 'vehiculos', 'tiposReserva'));
     }
 
+    /**
+     * Actualización de reserva (Solo Admin).
+     */
     public function update(Request $request, $id)
     {
         if ((session('user_type') ?? Auth::user()->role) !== 'admin') {
@@ -141,6 +161,9 @@ class TransferReservaController extends Controller
             ->with('success', 'Reserva actualizada correctamente.');
     }
 
+    /**
+     * Eliminación de reserva (Solo Admin).
+     */
     public function destroy($id)
     {
         if ((session('user_type') ?? Auth::user()->role) !== 'admin') {
@@ -151,6 +174,9 @@ class TransferReservaController extends Controller
         return redirect()->route('reservas.index')->with('success', 'Reserva eliminada.');
     }
 
+    /**
+     * Vista de calendario.
+     */
     public function calendar(Request $request)
     {
         $user = Auth::user();
