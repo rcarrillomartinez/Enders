@@ -92,7 +92,6 @@
         color: var(--brand-navy);
     }
 
-    /* Validación visual */
     .valido {
         border-color: var(--success-color) !important;
         box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1) !important;
@@ -108,7 +107,7 @@
         font-weight: 600;
         color: var(--error-color);
         margin-top: 5px;
-        display: none; /* Se muestra via JS */
+        display: none; 
     }
 
     .pass-feedback {
@@ -407,14 +406,12 @@
         }
 
         if (error) {
-            e.preventDefault(); // Detiene el envío PERO mantiene los valores en los inputs
-            // Opcional: Hacer scroll al primer error para mejorar UX
+            e.preventDefault(); // Detiene el envío pero mantiene los valores en los inputs
             const firstError = document.querySelector('.invalido');
             if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     });
 
-    // Limpiar clases de error al escribir para mejorar UX
     form.querySelectorAll('.form-control').forEach(input => {
         input.addEventListener('input', function() {
             if (this.value.trim() !== "") {
