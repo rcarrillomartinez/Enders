@@ -50,12 +50,10 @@
         gap: 10px;
     }
 
-    /* Iconos de sección en el azul de la marca */
     .section-title i {
         color: var(--brand-navy) !important;
     }
 
-    /* ESTILO DE TABLAS */
     .table thead th {
         background: #ffffff;
         text-transform: uppercase;
@@ -90,9 +88,8 @@
     }
 
     .badge-type {
-        background: #f1f5f9; /* Cambiado a gris suave para no distraer */
-        color: var(--brand-navy); /* Texto en azul de la marca */
-        border-radius: 6px;
+        background: #f1f5f9; 
+        color: var(--brand-navy); 
         padding: 0.4rem 0.6rem;
         font-size: 0.75rem;
         font-weight: 700;

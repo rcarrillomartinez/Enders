@@ -23,7 +23,6 @@
         max-width: 450px;
     }
 
-    /* Animación de sacudida si hay errores */
     .shake-error {
         animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
     }
@@ -71,7 +70,6 @@
         box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.08);
     }
 
-    /* Borde rojo cuando hay error */
     .input-error {
         border-color: var(--error-red) !important;
     }
@@ -84,7 +82,6 @@
         box-shadow: none !important;
     }
 
-    /* Estilo del ojo */
     .toggle-password-eye {
         position: absolute;
         right: 15px;
@@ -235,7 +232,6 @@
     const togglePass = document.getElementById('toggleLoginPass');
     const lockIcon = document.getElementById('lock-icon');
 
-    // 1. Mostrar/Ocultar campos dinámicamente
     function handleFields() {
         if (userType.value === 'hotel') {
             emailField.style.display = 'none';
@@ -249,16 +245,14 @@
     }
 
     userType.addEventListener('change', handleFields);
-    window.onload = handleFields; // Para que persista si hay error
+    window.onload = handleFields; 
 
-    // 2. Lógica del OJO
     togglePass.addEventListener('click', function() {
         const isPassword = passwordInput.type === 'password';
         passwordInput.type = isPassword ? 'text' : 'password';
         this.classList.toggle('fa-eye');
         this.classList.toggle('fa-eye-slash');
         
-        // Efecto visual: Abrir candado superior si se ve la contraseña
         lockIcon.className = isPassword ? 'fas fa-lock-open fa-2x text-white' : 'fas fa-lock fa-2x text-white';
     });
 </script>

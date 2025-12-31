@@ -21,7 +21,6 @@
         color: var(--text-dark);
     }
 
-    /* Animaciones de entrada */
     .reveal { animation: reveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
     .delay-1 { animation-delay: 0.1s; }
     .delay-2 { animation-delay: 0.2s; }
@@ -31,7 +30,6 @@
         to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Tarjetas Premium */
     .premium-card {
         background: #ffffff;
         border-radius: 30px;
@@ -41,7 +39,6 @@
         transition: transform 0.3s ease;
     }
 
-    /* Cabecera Negra Elegante */
     .brand-header-premium {
         background: var(--brand-navy);
         padding: 2.5rem;
@@ -56,12 +53,10 @@
         height: 55px;
         border-radius: 50%;
         object-fit: cover;
-        /* Actualizado: Círculo blanco sólido alrededor de la foto */
         border: 3px solid #ffffff; 
         background: var(--brand-navy);
     }
 
-    /* Elementos de Información */
     .info-label {
         font-size: 0.65rem;
         font-weight: 800;
@@ -74,7 +69,6 @@
 
     .value-main { font-weight: 700; font-size: 1.15rem; color: var(--brand-navy); }
 
-    /* Timeline de Vuelos */
     .timeline-premium {
         background: #f8fafc;
         border-radius: 24px;
@@ -88,12 +82,11 @@
         background: white;
         border-radius: 14px;
         display: flex; align-items: center; justify-content: center;
-        color: var(--brand-navy); /* Actualizado a Navy */
+        color: var(--brand-navy); 
         box-shadow: 0 4px 10px rgba(0,0,0,0.03);
         margin-bottom: 1rem;
     }
 
-    /* Badges de Estado */
     .status-pill {
         padding: 6px 16px;
         border-radius: 50px;
@@ -104,7 +97,6 @@
     .status-confirmada { background: #dcfce7; color: #15803d; }
     .status-pendiente { background: #fef9c3; color: #a16207; }
 
-    /* Botones */
     .btn-action {
         border-radius: 16px;
         padding: 14px 24px;
@@ -121,7 +113,6 @@
     
     .sidebar-sticky { position: sticky; top: 2rem; }
 
-    /* Sobreescribir colores primarios de Bootstrap a Navy */
     .text-primary { color: var(--brand-navy) !important; }
     .alert-primary { background: #f8fafc; color: var(--brand-navy); border: 1px solid #e2e8f0; }
 

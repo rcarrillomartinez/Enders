@@ -11,7 +11,6 @@
         --accent-blue: #3b82f6;
     }
 
-    /* Centrado absoluto: usa flex y min-height para que flote en el centro de la pantalla */
     .dashboard-wrapper {
         min-height: 85vh;
         display: flex;
@@ -58,7 +57,6 @@
         align-items: center;
     }
 
-    /* Filas de tarjetas centradas */
     .cards-row-custom {
         display: flex;
         justify-content: center;

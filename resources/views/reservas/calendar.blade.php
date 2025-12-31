@@ -241,24 +241,20 @@
 <div id="calendar-overlay" onclick="closeCalendar()"></div>
 
 <style>
-    /* VARIABLES Y BASE */
     .main-calendar-wrapper { font-family: 'Inter', sans-serif; background-color: #f1f5f9; min-height: 100vh; }
     .bg-slate-800 { background-color: #1e293b !important; }
     .btn-white { background: white; color: #475569; }
     
-    /* ESTILO HOY SEMANAL (FONDO OSCURO Y LETRAS BLANCAS) */
     .today-header-active { background-color: #334155 !important; border-bottom: none !important; }
     .today-column-active { background-color: #334155 !important; border-top: none !important; }
     .today-column-active .week-event-grey { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.2); color: white !important; }
     .today-column-active .text-dark { color: white !important; }
 
-    /* NAVEGACIÓN */
     .nav-btn-grey { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; background: #fff; border: 1px solid #e2e8f0; border-radius: 50%; color: #64748b; text-decoration: none; transition: 0.2s; }
     .nav-btn-grey:hover { background: #1e293b; color: white; }
     .hover-zinc:hover { background: #f8fafc !important; }
     #hidden-date-picker { visibility: hidden; width: 0; height: 0; position: absolute; }
 
-    /* GRID MENSAL */
     .month-days-header { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: #f8fafc; }
     .header-cell { padding: 15px; }
     .month-body { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: #e2e8f0; border: 1px solid #e2e8f0; }
@@ -269,20 +265,17 @@
     .event-pill-grey { display: block; background: #f1f5f9; color: #334155; padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; text-decoration: none; margin-top: 5px; border-left: 3px solid #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .extra-events { font-size: 0.65rem; font-weight: bold; margin-top: 4px; padding-left: 5px; }
 
-    /* ESTILO DIARIO / SEMANAL */
     .trayecto-item-grey { border: 1px solid #e2e8f0; border-left: 4px solid #1e293b; border-radius: 12px; background: #fff; transition: 0.2s; }
     .time-badge-grey { background: #1e293b; color: white; padding: 8px 12px; border-radius: 8px; font-weight: 700; min-width: 65px; text-align: center; }
     .week-cell { vertical-align: top; min-height: 250px; background: white; width: 14.28%; }
     .week-event-grey { display: block; background: #f8fafc; border: 1px solid #e2e8f0; border-left: 3px solid #1e293b; padding: 8px; margin-bottom: 6px; border-radius: 6px; text-decoration: none; color: inherit; }
 
-    /* ESTILOS MÓVIL */
     .mobile-date-divider { background: #f1f5f9; padding: 8px 15px; font-weight: 800; font-size: 0.8rem; color: #64748b; text-transform: uppercase; border-radius: 8px; margin-bottom: 10px; }
     .mobile-card { display: flex; align-items: center; background: white; border: 1px solid #e2e8f0; padding: 12px; border-radius: 12px; text-decoration: none; color: inherit; margin-bottom: 8px; }
     .m-time { font-weight: 800; color: #1e293b; font-size: 1rem; padding-right: 15px; border-right: 2px solid #f1f5f9; margin-right: 15px; }
     .m-info .m-name { font-weight: 700; color: #334155; font-size: 0.95rem; }
     .m-info .m-hotel { font-size: 0.8rem; color: #94a3b8; }
 
-    /* FLATICKR OVERLAY */
     #calendar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 9998; backdrop-filter: blur(4px); }
     #calendar-overlay.active { display: block; }
     .centered-calendar { position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; z-index: 9999 !important; border: 0 !important; }

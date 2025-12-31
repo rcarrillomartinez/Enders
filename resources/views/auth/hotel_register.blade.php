@@ -38,7 +38,6 @@
         display: flex; align-items: center; justify-content: center; margin-right: 12px;
     }
 
-    /* Contenedor relativo para el ojo */
     .password-wrapper { position: relative; }
 
     .form-control {
@@ -52,7 +51,6 @@
         outline: none;
     }
 
-    /* Estilo del botón del ojo */
     .toggle-password {
         position: absolute;
         right: 15px;

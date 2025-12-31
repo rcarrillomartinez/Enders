@@ -12,7 +12,7 @@
         --brand-hover: #1e293b;
         --accent-blue: #3b82f6;
         --bg-main: #f8fafc;
-        --border-focus: #475569; /* Un gris azulado oscuro para el foco */
+        --border-focus: #475569; 
     }
 
     body { 
@@ -45,7 +45,6 @@
         letter-spacing: -0.5px;
     }
 
-    /* ESTILO ICONOS EXTERNOS (Labels) */
     .form-label {
         font-weight: 700;
         color: var(--brand-navy);
@@ -79,10 +78,9 @@
         transition: all 0.2s ease;
     }
 
-    /* CAMBIO: Ahora el focus usa el azul oscuro de la marca */
     .form-control:focus, .form-select:focus {
         border-color: var(--brand-navy);
-        box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.1); /* Sombra suave basada en el navy */
+        box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.1);
         outline: none;
     }
 
@@ -94,7 +92,6 @@
         border: 1px dashed #cbd5e1;
     }
 
-    /* ESTADO DEL SERVICIO: Borde lateral oscuro */
     .select-estado-custom {
         border-left: 5px solid var(--brand-navy) !important;
     }

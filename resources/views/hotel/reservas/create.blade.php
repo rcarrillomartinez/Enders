@@ -22,7 +22,6 @@
         color: var(--text-main);
     }
 
-    /* Botón Volver al Panel Estilizado */
     .btn-back-elegant {
         display: inline-flex;
         align-items: center;
@@ -272,7 +271,6 @@ document.addEventListener('DOMContentLoaded', function() {
         let disponibles = 0;
 
         // Mostrar/Ocultar bloques según tipo de reserva
-        // Ajustar IDs si son distintos en tu BD (1=Ida, 2=Vuelta, 3=Ida/Vuelta)
         bIda.style.display = (val == "1" || val == "3") ? "block" : "none";
         bVuelta.style.display = (val == "2" || val == "3") ? "block" : "none";
 

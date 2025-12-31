@@ -31,7 +31,6 @@
             text-transform: uppercase;
         }
 
-        /* Estilo para el Nombre del Usuario */
         .user-name-display {
             color: white !important;
             font-weight: 600;
@@ -48,7 +47,6 @@
             color: rgba(255,255,255,0.7);
         }
 
-        /* Enlaces con subrayado */
         .nav-link {
             color: rgba(255,255,255,0.8) !important;
             font-weight: 500;
@@ -80,7 +78,6 @@
             color: white !important;
         }
 
-        /* Ajuste específico para el botón de Logout */
         .btn-logout-nav {
             background: none !important;
             border: none !important;
@@ -91,7 +88,6 @@
             align-items: center;
         }
 
-        /* Animaciones */
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }

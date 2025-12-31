@@ -8,7 +8,7 @@
 
 <style>
     :root {
-        --brand-blue: #0f172a; /* Tu azul principal */
+        --brand-blue: #0f172a; 
         --brand-blue-soft: #f1f5f9;
         --brand-blue-muted: #64748b;
         --bg-main: #f8fafc;
@@ -18,7 +18,6 @@
 
     .dashboard-container { max-width: 1000px; margin: 2rem auto; padding: 0 1.5rem; }
 
-    /* Botón Volver */
     .btn-dashboard-back {
         display: inline-flex;
         align-items: center;
@@ -39,7 +38,6 @@
         transform: translateX(-4px); 
     }
 
-    /* Tarjeta Principal */
     .glass-card-dashboard {
         background: white;
         border-radius: 24px;
@@ -59,7 +57,6 @@
 
     .brand-header-dashboard h3 { font-weight: 800; margin: 0; font-size: 1.6rem; letter-spacing: -0.5px; }
 
-    /* Tabla */
     .table-container { padding: 1.5rem; }
     
     .custom-table { width: 100%; border-collapse: separate; border-spacing: 0; }
@@ -84,7 +81,6 @@
         color: var(--brand-blue);
     }
 
-    /* Estilo de los Meses y Números */
     .month-badge {
         background: var(--brand-blue-soft);
         color: var(--brand-blue);

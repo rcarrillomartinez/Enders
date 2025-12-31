@@ -39,7 +39,6 @@
         color: white;
     }
 
-    /* BOTÓN "NUEVO HOTEL" */
     .btn-primary-custom {
         background: #ffffff;
         color: var(--brand-navy);
@@ -62,7 +61,6 @@
         color: var(--brand-navy);
     }
 
-    /* ESTILO DE TABLA */
     .table thead th {
         background: #ffffff;
         text-transform: uppercase;
@@ -94,7 +92,6 @@
         font-size: 0.85rem;
     }
 
-    /* BOTONES DE ACCIÓN: UNIFICADOS EN NAVY */
     .action-btn {
         width: 40px;
         height: 40px;
@@ -109,7 +106,6 @@
         text-decoration: none;
     }
 
-    /* Hover fondo oscuro para todos los botones de acción */
     .action-btn:hover {
         background: var(--brand-navy);
         color: #ffffff;

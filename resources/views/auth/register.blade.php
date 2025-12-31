@@ -15,7 +15,6 @@
 
                         <input type="hidden" name="user_type" value="viajero">
 
-                        <!-- Campos de Viajero -->
                         <div id="viajero-fields" style="display:none;">
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email</label>
@@ -73,8 +72,6 @@
                             </div>
                         </div>
 
-
-                        <!-- Campos Comunes -->
                         <div class="mb-3">
                             <label for="password" class="form-label">Contraseña</label>
                             <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password">
@@ -94,7 +91,7 @@
                     <hr>
 
                     <p class="text-center mb-0">
-                                                ¿Ya tienes cuenta? <a href="{{ route('login') }}">Inicia sesión aquí</a>
+                         ¿Ya tienes cuenta? <a href="{{ route('login') }}">Inicia sesión aquí</a>
                     </p>
                 </div>
             </div>
@@ -103,7 +100,6 @@
 
     @section('scripts')
         <script>
-            // No hotel registration option on public form; show viajero fields by default
             document.getElementById('viajero-fields').style.display = 'block';
         </script>
     @endsection

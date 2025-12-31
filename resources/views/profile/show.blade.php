@@ -248,7 +248,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const errorMsg = document.getElementById('error-msg');
     const fotoInput = document.getElementById('foto-input');
 
-    // 1. Previsualización de Foto (Solo si existe el input)
+    // Previsualización de Foto (Solo si existe el input)
     if (fotoInput) {
         fotoInput.addEventListener('change', function() {
             const file = this.files[0];
@@ -260,7 +260,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // 2. Progreso Fluido
     function updateProgress() {
         let total = inputs.length;
         let filled = 0;
@@ -270,7 +269,7 @@ document.addEventListener('DOMContentLoaded', function() {
         percentText.innerText = percentage + '%';
     }
 
-    // 3. Validación de contraseñas
+    // Validación de contraseñas
     function validatePasswords() {
         const p1 = passField.value;
         const p2 = confirmField.value;
@@ -295,7 +294,7 @@ document.addEventListener('DOMContentLoaded', function() {
     passField.addEventListener('input', validatePasswords);
     confirmField.addEventListener('input', validatePasswords);
 
-    // 4. Nombre en vivo
+    // Nombre en vivo
     if(inputNombre) {
         inputNombre.addEventListener('input', function() {
             displayName.innerText = this.value || 'Usuario';
@@ -304,7 +303,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     inputs.forEach(input => { input.addEventListener('input', updateProgress); });
 
-    // 5. Toggle password (Ojo)
+    // Toggle password (Ojo)
     function setupPasswordToggle(toggleId, inputId) {
         const toggle = document.getElementById(toggleId);
         const input = document.getElementById(inputId);

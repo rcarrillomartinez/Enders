@@ -22,7 +22,6 @@
         font-family: 'Plus Jakarta Sans', sans-serif; 
     }
 
-    /* Animación de entrada para la página */
     .animate-page {
         animation: fadeIn 0.6s ease-out;
     }
@@ -32,13 +31,11 @@
         to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Animación para la barra de información */
     @keyframes slideInRight {
         from { opacity: 0; transform: translateX(-20px); }
         to { opacity: 1; transform: translateX(0); }
     }
 
-    /* Card Principal */
     .reservas-card-main {
         border-radius: 28px;
         border: 1px solid rgba(226, 232, 240, 0.8);
@@ -47,7 +44,6 @@
         background: #ffffff;
     }
 
-    /* Cabecera Premium */
     .header-navy {
         background: var(--brand-navy);
         padding: 2.5rem;
@@ -67,7 +63,6 @@
         letter-spacing: 1px;
     }
 
-    /* Botones de Acción Superiores */
     .btn-action-top {
         background: rgba(255, 255, 255, 0.1);
         backdrop-filter: blur(10px);
@@ -88,7 +83,6 @@
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     }
 
-    /* --- BARRA INFORMATIVA CON BRAND NAVY --- */
     .info-bar-custom {
         background: linear-gradient(90deg, #f8fafc 0%, #ffffff 100%);
         border: 1px solid #e2e8f0;
@@ -129,7 +123,6 @@
         border-radius: 6px;
     }
 
-    /* Estilo de Tabla Modernizada */
     .table-responsive { border-radius: 16px; }
     
     .table thead th {
@@ -160,7 +153,6 @@
         font-weight: 500;
     }
 
-    /* Badge Localizador */
     .localizador-badge {
         font-family: 'JetBrains Mono', monospace;
         background: #f1f5f9;
@@ -172,7 +164,6 @@
         border: 1px solid #e2e8f0;
     }
 
-    /* Badges de Estado Pill */
     .status-pill {
         padding: 6px 14px;
         border-radius: 50px;
@@ -188,7 +179,6 @@
     .status-cancelada { background: #fee2e2; color: #991b1b; }
     .status-pendiente { background: #fef3c7; color: #92400e; }
 
-    /* Botones de Acción en Fila */
     .btn-circle {
         width: 38px;
         height: 38px;
@@ -203,7 +193,6 @@
         text-decoration: none;
     }
 
-    /* Modificado: El ojo (show) ahora solo cambia color, no se mueve */
     .btn-view-only:hover {
         background: var(--brand-navy);
         color: white;
@@ -211,7 +200,6 @@
         transform: none !important; 
     }
 
-    /* Los demás botones conservan su rotación */
     .btn-circle:not(.btn-view-only):hover {
         background: var(--brand-navy);
         color: white;
@@ -224,7 +212,6 @@
         border-color: var(--danger);
     }
 
-    /* Card Móvil */
     .mobile-reserva-card {
         border-radius: 20px;
         border: 1px solid #e2e8f0;
@@ -233,7 +220,6 @@
         background: white;
     }
     
-    /* Color unificado para icono hotel */
     .text-hotel-custom {
         color: var(--brand-navy) !important;
     }
