@@ -16,6 +16,7 @@ class Vehiculo extends Model
         'tipo_vehiculo',
         'matricula',
         'capacidad',
+        'email_conductor',
     ];
 
     /**

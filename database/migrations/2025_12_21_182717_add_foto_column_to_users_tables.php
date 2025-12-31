@@ -15,13 +15,6 @@ return new class extends Migration
             });
         }
 
-        // Para hoteles
-        if (!Schema::hasColumn('transfer_hoteles', 'foto')) {
-            Schema::table('tranfer_hotel', function (Blueprint $table) {
-                $table->string('foto')->nullable()->after('email');
-            });
-        }
-
         // Para admins
         if (!Schema::hasColumn('transfer_admins', 'foto')) {
             Schema::table('transfer_admin', function (Blueprint $table) {
@@ -33,7 +26,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('transfer_viajeros', function ($column) { $column->dropColumn('foto'); });
-        Schema::table('tranfer_hotel', function ($column) { $column->dropColumn('foto'); });
         Schema::table('transfer_admin', function ($column) { $column->dropColumn('foto'); });
     }
 };

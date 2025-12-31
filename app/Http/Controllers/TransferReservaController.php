@@ -82,6 +82,7 @@ class TransferReservaController extends Controller
             'num_viajeros' => 'required|integer|min:1',
             'id_vehiculo' => 'required|exists:transfer_vehiculo,id_vehiculo',
             'estado' => 'nullable|in:pendiente,confirmada,cancelada,completada',
+            'observaciones' => 'nullable|string'
         ]);
 
         $reserva = new TransferReserva();

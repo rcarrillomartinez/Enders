@@ -28,6 +28,7 @@ class TransferReserva extends Model
         'num_viajeros',
         'id_vehiculo',
         'estado',
+        'observaciones',
         'nombre_cliente',
         'apellido1_cliente',
         'apellido2_cliente',
