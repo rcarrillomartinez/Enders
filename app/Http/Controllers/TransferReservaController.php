@@ -87,6 +87,15 @@ class TransferReservaController extends Controller
 
         $reserva = new TransferReserva();
         $reserva->fill($validated);
+
+        if ($request->fecha_entrada && $request->hora_entrada) {
+            $reserva->fecha_entrada = Carbon::parse($request->fecha_entrada . ' ' . $request->hora_entrada);
+        }
+        
+        //  Combinar fecha y hora de salida si existen
+        if ($request->fecha_vuelo_salida && $request->hora_partida) {
+            $reserva->fecha_vuelo_salida = Carbon::parse($request->fecha_vuelo_salida . ' ' . $request->hora_partida);
+        }
         
         // Aseguramos la asignación del vehículo y metadatos
         $reserva->id_vehiculo = $validated['id_vehiculo'];
@@ -159,6 +168,16 @@ class TransferReservaController extends Controller
         ]);
 
         $reserva->update($validated);
+
+        // Actualizar fecha con hora incluida
+        if ($request->fecha_entrada && $request->hora_entrada) {
+            $reserva->fecha_entrada = Carbon::parse($request->fecha_entrada . ' ' . $request->hora_entrada);
+        }
+
+        if ($request->fecha_vuelo_salida && $request->hora_partida) {
+            $reserva->fecha_vuelo_salida = Carbon::parse($request->fecha_vuelo_salida . ' ' . $request->hora_partida);
+        }
+
         $reserva->fecha_modificacion = now();
         $reserva->save();
 

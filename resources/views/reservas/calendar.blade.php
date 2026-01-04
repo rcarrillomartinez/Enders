@@ -33,7 +33,7 @@
                             <a href="{{ route('reservas.calendar', ['view' => $key, 'date' => $currentDate->format('Y-m-d')]) }}" 
                                class="btn {{ $viewMode === $key ? 'btn-dark shadow-sm' : 'btn-light border-0 text-muted' }} px-2 px-md-3 fw-bold flex-fill"
                                style="border-radius: 8px; font-size: 0.85rem;">
-                                {{ $label }}
+                                 {{ $label }}
                             </a>
                         @endforeach
                     </div>
@@ -99,7 +99,8 @@
                                 <div class="event-container">
                                     @foreach ($dayRes->take(3) as $res)
                                         <a href="{{ route('reservas.show', $res->id_reserva) }}" class="event-pill-grey">
-                                            <strong>{{ \Carbon\Carbon::parse($res->fecha_entrada)->format('H:i') }}</strong> {{ Str::limit($res->nombre_cliente, 10) }}
+                                            {{-- MODIFICACIÓN AQUÍ: Priorizar hora_entrada si fecha_entrada marca 00:00 --}}
+                                            <strong>{{ (Carbon\Carbon::parse($res->fecha_entrada)->format('H:i') == '00:00' && $res->hora_entrada) ? Carbon\Carbon::parse($res->hora_entrada)->format('H:i') : Carbon\Carbon::parse($res->fecha_entrada)->format('H:i') }}</strong>
                                         </a>
                                     @endforeach
                                     @if($dayRes->count() > 3)
@@ -122,7 +123,8 @@
                             <div class="mobile-date-divider">{{ \Carbon\Carbon::parse($date)->translatedFormat('l, d \d\e F') }}</div>
                             @foreach(collect($reservas)->sortBy('fecha_entrada') as $res)
                                 <a href="{{ route('reservas.show', $res->id_reserva) }}" class="mobile-card">
-                                    <div class="m-time">{{ \Carbon\Carbon::parse($res->fecha_entrada)->format('H:i') }}</div>
+                                    {{-- MODIFICACIÓN AQUÍ --}}
+                                    <div class="m-time">{{ (Carbon\Carbon::parse($res->fecha_entrada)->format('H:i') == '00:00' && $res->hora_entrada) ? Carbon\Carbon::parse($res->hora_entrada)->format('H:i') : Carbon\Carbon::parse($res->fecha_entrada)->format('H:i') }}</div>
                                     <div class="m-info">
                                         <div class="m-name">{{ $res->nombre_cliente }}</div>
                                         <div class="m-hotel">{{ $res->hotel->nombre_hotel ?? 'Sin Hotel' }}</div>
@@ -133,9 +135,6 @@
                         </div>
                     @endif
                 @endforeach
-                @if(!$foundMonth)
-                    <div class="text-center py-5 text-muted">No hay trayectos este mes.</div>
-                @endif
             </div>
         @endif
 
@@ -146,7 +145,8 @@
                     <a href="{{ route('reservas.show', $res->id_reserva) }}" class="trayecto-item-grey mb-3 p-3 d-block text-decoration-none">
                         <div class="d-flex align-items-center">
                             <div class="time-badge-grey me-3 me-md-4">
-                                {{ \Carbon\Carbon::parse($res->fecha_entrada)->format('H:i') }}
+                                {{-- MODIFICACIÓN AQUÍ --}}
+                                {{ (Carbon\Carbon::parse($res->fecha_entrada)->format('H:i') == '00:00' && $res->hora_entrada) ? Carbon\Carbon::parse($res->hora_entrada)->format('H:i') : Carbon\Carbon::parse($res->fecha_entrada)->format('H:i') }}
                             </div>
                             <div class="flex-grow-1">
                                 <h6 class="fw-bold mb-1 text-slate-800">{{ $res->nombre_cliente }}</h6>
@@ -190,13 +190,14 @@
                                 <td class="week-cell p-2 {{ $isToday ? 'today-column-active' : '' }}">
                                     @forelse ($dayRes as $res)
                                         <a href="{{ route('reservas.show', $res->id_reserva) }}" class="week-event-grey">
-                                            <div class="fw-bold small">{{ \Carbon\Carbon::parse($res->fecha_entrada)->format('H:i') }}</div>
+                                            {{-- MODIFICACIÓN AQUÍ --}}
+                                            <div class="fw-bold small">{{ (Carbon\Carbon::parse($res->fecha_entrada)->format('H:i') == '00:00' && $res->hora_entrada) ? Carbon\Carbon::parse($res->hora_entrada)->format('H:i') : Carbon\Carbon::parse($res->fecha_entrada)->format('H:i') }}</div>
                                             <div class="text-truncate small">{{ $res->nombre_cliente }}</div>
                                         </a>
                                     @empty
                                         <div class="text-center py-4 {{ $isToday ? 'text-white' : 'opacity-25' }}">
                                             <i class="fa fa-calendar-times d-block mb-1"></i>
-                                            <span style="font-size: 0.65rem;">No hay trayectos para hoy.</span>
+                                            <span style="font-size: 0.65rem;">No hay trayectos.</span>
                                         </div>
                                     @endforelse
                                 </td>
@@ -215,11 +216,11 @@
                     <div class="mobile-day-group mb-3">
                         <div class="mobile-date-divider {{ $ds->isToday() ? 'bg-dark text-white' : '' }}">
                             {{ $ds->translatedFormat('l, d M') }}
-                            @if($ds->isToday()) <span class="badge bg-primary ms-2">HOY</span> @endif
                         </div>
                         @forelse($dayRes as $res)
                             <a href="{{ route('reservas.show', $res->id_reserva) }}" class="mobile-card">
-                                <div class="m-time">{{ \Carbon\Carbon::parse($res->fecha_entrada)->format('H:i') }}</div>
+                                {{-- MODIFICACIÓN AQUÍ --}}
+                                <div class="m-time">{{ (Carbon\Carbon::parse($res->fecha_entrada)->format('H:i') == '00:00' && $res->hora_entrada) ? Carbon\Carbon::parse($res->hora_entrada)->format('H:i') : Carbon\Carbon::parse($res->fecha_entrada)->format('H:i') }}</div>
                                 <div class="m-info">
                                     <div class="m-name">{{ $res->nombre_cliente }}</div>
                                     <div class="m-hotel small text-muted">{{ $res->hotel->nombre_hotel ?? 'N/A' }}</div>
@@ -228,7 +229,7 @@
                             </a>
                         @empty
                             <div class="p-3 text-center border rounded-3 bg-light opacity-50 mb-2">
-                                <small class="text-muted">No hay trayectos para hoy.</small>
+                                <small class="text-muted">No hay trayectos.</small>
                             </div>
                         @endforelse
                     </div>
@@ -237,9 +238,6 @@
         @endif
     </div>
 </div>
-
-<div id="calendar-overlay" onclick="closeCalendar()"></div>
-
 <style>
     .main-calendar-wrapper { font-family: 'Inter', sans-serif; background-color: #f1f5f9; min-height: 100vh; }
     .bg-slate-800 { background-color: #1e293b !important; }
