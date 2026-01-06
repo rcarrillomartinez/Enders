@@ -210,8 +210,8 @@
                             @endif
 
                             @if(in_array($reserva->id_tipo_reserva, [2, 3]))
-                            <div class="col-md-5 text-md-end">
-                                <div class="icon-box ms-auto mx-auto mx-md-0"><i class="fas fa-plane-departure"></i></div>
+                            <div class="col-md-5 text-center text-md-end">
+                                <div class="icon-box mx-auto ms-md-auto"><i class="fas fa-plane-departure"></i></div>
                                 <span class="info-label">Vuelo de Regreso</span>
                                 <div class="h3 fw-800 mb-1" style="color: var(--brand-navy)">{{ $reserva->hora_partida ?? 'Pendiente' }}</div>
                                 <div class="fw-bold text-dark mb-2">{{ \Carbon\Carbon::parse($reserva->fecha_vuelo_salida)->format('d M, Y') }}</div>
