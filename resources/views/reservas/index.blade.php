@@ -265,7 +265,8 @@
                                         <th>Localizador</th>
                                         <th>Información Hotel</th>
                                         <th>Titular</th>
-                                        <th>Fecha Servicio</th>
+                                        <th>Fecha Ida</th>
+                                        <th>Fecha Vuelta</th>
                                         <th class="text-center">Estado</th>
                                         <th class="text-end">Acciones</th>
                                     </tr>
@@ -295,11 +296,27 @@
                                             <td>
                                                 <span class="fw-bold text-dark">{{ $reserva->nombre_cliente }}</span>
                                             </td>
+                                            {{-- IDA --}}
                                             <td>
-                                                <div class="d-flex align-items-center">
-                                                    <i class="far fa-calendar-alt me-2 text-muted"></i>
-                                                    {{ $reserva->fecha_entrada ? \Carbon\Carbon::parse($reserva->fecha_entrada)->format('d M, Y') : 'N/A' }}
-                                                </div>
+                                                @if($reserva->fecha_entrada)
+                                                    <div class="d-flex align-items-center text-nowrap">
+                                                        <i class="far fa-calendar-alt me-2 text-primary"></i>
+                                                        {{ \Carbon\Carbon::parse($reserva->fecha_entrada)->format('d M, Y') }}
+                                                    </div>
+                                                @else
+                                                    <span class="text-muted opacity-50">—</span>
+                                                @endif
+                                            </td>
+                                            {{-- VUELTA (Usando fecha_vuelo_salida) --}}
+                                            <td>
+                                                @if($reserva->fecha_vuelo_salida)
+                                                    <div class="d-flex align-items-center text-nowrap">
+                                                        <i class="fas fa-undo me-2 text-info"></i>
+                                                        {{ \Carbon\Carbon::parse($reserva->fecha_vuelo_salida)->format('d M, Y') }}
+                                                    </div>
+                                                @else
+                                                    <span class="text-muted opacity-50">—</span>
+                                                @endif
                                             </td>
                                             <td class="text-center">
                                                 <span class="status-pill {{ $statusClass }}">
@@ -331,8 +348,16 @@
                             </table>
                         </div>
 
+                        {{-- VISTA MÓVIL --}}
                         <div class="d-md-none">
                             @foreach ($reservas as $reserva)
+                                @php
+                                    $statusClass = match($reserva->estado) {
+                                        'confirmada' => 'status-confirmada',
+                                        'cancelada' => 'status-cancelada',
+                                        default => 'status-pendiente',
+                                    };
+                                @endphp
                                 <div class="mobile-reserva-card shadow-sm">
                                     <div class="d-flex justify-content-between mb-3">
                                         <span class="localizador-badge">{{ $reserva->localizador }}</span>
@@ -340,8 +365,15 @@
                                     </div>
                                     <h5 class="fw-bold mb-3">{{ $reserva->nombre_cliente }}</h5>
                                     <div class="mb-4">
-                                        <p class="mb-1 small"><i class="fas fa-hotel me-2 text-muted"></i>{{ $reserva->hotel->nombre_hotel ?? 'N/A' }}</p>
-                                        <p class="mb-0 small"><i class="far fa-calendar-alt me-2 text-muted"></i>{{ $reserva->fecha_entrada ? \Carbon\Carbon::parse($reserva->fecha_entrada)->format('d/m/Y') : 'N/A' }}</p>
+                                        <p class="mb-2 small"><i class="fas fa-hotel me-2 text-muted"></i>{{ $reserva->hotel->nombre_hotel ?? 'N/A' }}</p>
+                                        
+                                        @if($reserva->fecha_entrada)
+                                            <p class="mb-1 small"><i class="far fa-calendar-alt me-2 text-primary"></i>Ida: {{ \Carbon\Carbon::parse($reserva->fecha_entrada)->format('d/m/Y') }}</p>
+                                        @endif
+                                        
+                                        @if($reserva->fecha_vuelo_salida)
+                                            <p class="mb-0 small"><i class="fas fa-undo me-2 text-info"></i>Vuelta: {{ \Carbon\Carbon::parse($reserva->fecha_vuelo_salida)->format('d/m/Y') }}</p>
+                                        @endif
                                     </div>
                                     <a href="{{ route('reservas.show', $reserva->id_reserva) }}" class="btn w-100 fw-bold" style="background: var(--brand-navy); color: white; border-radius: 12px; padding: 0.8rem;">
                                         VER DETALLES
