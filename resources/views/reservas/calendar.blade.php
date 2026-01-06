@@ -238,6 +238,7 @@
         @endif
     </div>
 </div>
+<div id="calendar-overlay" onclick="closeCalendar()"></div>
 <style>
     .main-calendar-wrapper { font-family: 'Inter', sans-serif; background-color: #f1f5f9; min-height: 100vh; }
     .bg-slate-800 { background-color: #1e293b !important; }
