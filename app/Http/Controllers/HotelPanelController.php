@@ -67,6 +67,7 @@ class HotelPanelController extends Controller
             'nombre_cliente' => 'nullable|string',
             'apellido1_cliente' => 'nullable|string',
             'apellido2_cliente' => 'nullable|string',
+            'observaciones' => 'nullable|string'
         ]);
 
         $res = TransferReserva::create([
@@ -87,6 +88,7 @@ class HotelPanelController extends Controller
             'nombre_cliente' => $validated['nombre_cliente'] ?? null,
             'apellido1_cliente' => $validated['apellido1_cliente'] ?? null,
             'apellido2_cliente' => $validated['apellido2_cliente'] ?? null,
+            'observaciones' => $validated['observaciones'] ?? null,
         ]);
 
         return redirect()->route('hotel.reservas.index')->with('success', 'Reserva creada correctamente');

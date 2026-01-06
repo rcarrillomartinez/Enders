@@ -60,9 +60,7 @@
         text-transform: uppercase;
         letter-spacing: 1px;
         width: 100%;
-        text-decoration: none;
-        display: block;
-        text-align: center;
+        cursor: pointer;
     }
 
     .btn-save-profile:hover {
@@ -83,36 +81,33 @@
         z-index: 10;
     }
 
-    .camera-label:hover { transform: scale(1.1); }
-
     .custom-input-group { position: relative; display: flex; align-items: center; }
     .custom-input-group .icon { position: absolute; left: 16px; color: #94a3b8; z-index: 10; }
-    .custom-input-group .custom-control { padding-left: 45px !important; padding-right: 45px !important; }
+    .custom-input-group .custom-control { padding-left: 45px !important; }
 
     .toggle-password-icon {
         position: absolute; right: 15px; cursor: pointer;
-        color: #94a3b8; transition: 0.2s; z-index: 20;
+        color: #94a3b8; z-index: 20;
     }
-    .toggle-password-icon:hover { color: var(--brand-navy); }
 
     .progress-main {
         height: 8px; border-radius: 10px; background: rgba(255,255,255,0.15); overflow: hidden;
     }
-    #profile-bar { 
-        transition: width 1s ease-in-out; background-color: white !important;
-    }
+    #profile-bar { transition: width 0.8s ease; background-color: white !important; }
 
     .password-error-msg {
         color: var(--error-red); font-size: 0.7rem; font-weight: 700;
         margin-top: 5px; display: none; align-items: center; gap: 4px;
     }
-
     .match-success { color: var(--success-green) !important; }
 </style>
 
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-lg-10">
+            {{-- NOTA: He quitado el bloque @if(session('success')) de aquí --}}
+            {{-- para evitar que salga doble si ya está en tu layouts.app --}}
+
             <div class="card profile-card-main">
                 <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" id="profileForm">
                     @csrf 
@@ -121,7 +116,6 @@
                     <div class="row g-0">
                         <div class="col-md-4 sidebar-navy d-flex flex-column align-items-center justify-content-center text-center">
                             
-                            {{-- Si NO es hotel, mostrar selector de foto --}}
                             @if (session('user_type') !== 'hotel')
                                 <div class="position-relative mb-4">
                                     <div class="rounded-circle bg-white p-1 shadow-lg" style="width: 155px; height: 155px; overflow: hidden;">
@@ -135,7 +129,6 @@
                                     </label>
                                 </div>
                             @else
-                                {{-- Si ES hotel, mostramos un icono grande representativo en lugar de foto --}}
                                 <div class="mb-4">
                                     <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 100px; height: 100px; background: rgba(255,255,255,0.1); border: 2px dashed rgba(255,255,255,0.3);">
                                         <i class="fas fa-hotel fa-3x text-white"></i>
@@ -144,12 +137,12 @@
                             @endif
 
                             <h4 class="fw-bold mb-1" id="display-name">{{ $user->nombre ?? $user->nombre_hotel ?? 'Usuario' }}</h4>
-                            <p class="text-white-50 small mb-4 text-uppercase fw-bold" style="letter-spacing: 1px;">{{ session('user_type') }}</p>
+                            <p class="text-white-50 small mb-4 text-uppercase fw-bold">{{ session('user_type') }}</p>
                             
                             <div class="w-100 px-3 mt-4">
-                                <p class="small mb-2">Perfil completado: <span id="percent-text" class="fw-bold">{{ round($porcentaje) }}%</span></p>
+                                <p class="small mb-2">Perfil completado: <span id="percent-text" class="fw-bold">0%</span></p>
                                 <div class="progress progress-main">
-                                    <div id="profile-bar" class="progress-bar" style="width: {{ $porcentaje }}%;"></div>
+                                    <div id="profile-bar" class="progress-bar" style="width: 0%;"></div>
                                 </div>
                             </div>
                         </div>
@@ -159,14 +152,19 @@
 
                             <div class="row">
                                 <div class="col-12 mb-4">
-                                    <label class="form-label-custom">{{ session('user_type') === 'hotel' ? 'Usuario de acceso' : 'Correo electrónico' }}</label>
+                                    <label class="form-label-custom">
+                                        {{ session('user_type') === 'hotel' ? 'Usuario de acceso' : 'Correo electrónico' }}
+                                    </label>
                                     <div class="custom-input-group">
                                         <i class="fas fa-{{ session('user_type') === 'hotel' ? 'user' : 'envelope' }} icon"></i>
-                                        <input type="text" name="email" id="input-email" class="custom-control profile-input" value="{{ $user->email ?? $user->usuario ?? '' }}">
+                                        <input type="text" 
+                                               name="{{ session('user_type') === 'hotel' ? 'usuario' : 'email' }}" 
+                                               class="custom-control profile-input" 
+                                               value="{{ $user->email ?? $user->usuario ?? '' }}">
                                     </div>
                                 </div>
 
-                                @if (session('user_type') === 'viajero' || session('user_type') === 'admin')
+                                @if (session('user_type') !== 'hotel')
                                     <div class="col-md-6 mb-4">
                                         <label class="form-label-custom">Nombre</label>
                                         <input type="text" name="nombre" id="input-nombre" class="custom-control profile-input" value="{{ $user->nombre ?? '' }}">
@@ -174,19 +172,17 @@
                                     @if (session('user_type') === 'viajero')
                                         <div class="col-md-6 mb-4">
                                             <label class="form-label-custom">Primer Apellido</label>
-                                            <input type="text" name="apellido1" id="input-apellido" class="custom-control profile-input" value="{{ $user->apellido1 ?? '' }}">
+                                            <input type="text" name="apellido1" class="custom-control profile-input" value="{{ $user->apellido1 ?? '' }}">
                                         </div>
                                         <div class="col-12 mb-4">
                                             <label class="form-label-custom">Ciudad</label>
                                             <div class="custom-input-group">
                                                 <i class="fas fa-location-dot icon"></i>
-                                                <input type="text" name="ciudad" id="input-ciudad" class="custom-control profile-input" value="{{ $user->ciudad ?? '' }}">
+                                                <input type="text" name="ciudad" class="custom-control profile-input" value="{{ $user->ciudad ?? '' }}">
                                             </div>
                                         </div>
                                     @endif
-                                @endif
-
-                                @if (session('user_type') === 'hotel')
+                                @else
                                     <div class="col-12 mb-4">
                                         <label class="form-label-custom">Nombre del Hotel</label>
                                         <div class="custom-input-group">
@@ -199,14 +195,14 @@
 
                             <hr class="my-5 opacity-25">
 
-                            <h6 class="fw-bold mb-4" style="color: var(--brand-navy); letter-spacing: 0.5px;">SEGURIDAD</h6>
+                            <h6 class="fw-bold mb-4" style="color: var(--brand-navy);">SEGURIDAD (Opcional)</h6>
                             
                             <div class="row">
                                 <div class="col-md-6 mb-4">
                                     <label class="form-label-custom text-muted">Nueva Contraseña</label>
                                     <div class="custom-input-group">
                                         <i class="fas fa-lock icon"></i>
-                                        <input type="password" name="new_password" id="pass-field" class="custom-control" placeholder="••••••••">
+                                        <input type="password" name="password" id="pass-field" class="custom-control" placeholder="••••••••">
                                         <i class="fas fa-eye toggle-password-icon" id="togglePass"></i>
                                     </div>
                                 </div>
@@ -248,7 +244,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const errorMsg = document.getElementById('error-msg');
     const fotoInput = document.getElementById('foto-input');
 
-    // Previsualización de Foto (Solo si existe el input)
     if (fotoInput) {
         fotoInput.addEventListener('change', function() {
             const file = this.files[0];
@@ -264,18 +259,14 @@ document.addEventListener('DOMContentLoaded', function() {
         let total = inputs.length;
         let filled = 0;
         inputs.forEach(input => { if (input.value.trim() !== '') filled++; });
-        let percentage = Math.round((filled / total) * 100);
+        let percentage = total > 0 ? Math.round((filled / total) * 100) : 0;
         bar.style.width = percentage + '%';
         percentText.innerText = percentage + '%';
     }
 
-    // Validación de contraseñas
     function validatePasswords() {
-        const p1 = passField.value;
-        const p2 = confirmField.value;
-
-        if (p2.length > 0) {
-            if (p1 === p2) {
+        if (confirmField.value.length > 0) {
+            if (passField.value === confirmField.value) {
                 checkIcon.classList.add('match-success');
                 confirmField.style.borderColor = 'var(--success-green)';
                 errorMsg.style.display = 'none';
@@ -293,34 +284,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
     passField.addEventListener('input', validatePasswords);
     confirmField.addEventListener('input', validatePasswords);
-
-    // Nombre en vivo
     if(inputNombre) {
         inputNombre.addEventListener('input', function() {
             displayName.innerText = this.value || 'Usuario';
         });
     }
-
     inputs.forEach(input => { input.addEventListener('input', updateProgress); });
 
-    // Toggle password (Ojo)
     function setupPasswordToggle(toggleId, inputId) {
         const toggle = document.getElementById(toggleId);
         const input = document.getElementById(inputId);
         if (toggle && input) {
             toggle.addEventListener('click', function() {
-                const isPassword = input.type === 'password';
-                input.type = isPassword ? 'text' : 'password';
+                input.type = input.type === 'password' ? 'text' : 'password';
                 this.classList.toggle('fa-eye');
                 this.classList.toggle('fa-eye-slash');
             });
         }
     }
-
     setupPasswordToggle('togglePass', 'pass-field');
     setupPasswordToggle('toggleConfirmPass', 'confirm-pass-field');
 
-    setTimeout(updateProgress, 300);
+    updateProgress();
 });
 </script>
 @endsection

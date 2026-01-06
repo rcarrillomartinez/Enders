@@ -34,11 +34,11 @@ class TransferReserva extends Model
         'apellido2_cliente',
     ];
 
-    protected $dates = [
-        'fecha_reserva',
-        'fecha_modificacion',
-        'fecha_entrada',
-        'fecha_vuelo_salida',
+    protected $casts = [
+        'fecha_reserva'      => 'date',
+        'fecha_modificacion' => 'date',
+        'fecha_entrada'      => 'date',
+        'fecha_vuelo_salida' => 'date',
     ];
 
     /**

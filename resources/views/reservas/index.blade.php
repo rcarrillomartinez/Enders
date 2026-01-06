@@ -223,6 +223,80 @@
     .text-hotel-custom {
         color: var(--brand-navy) !important;
     }
+
+    .custom-pagination-section {
+        margin-top: 3rem;
+        padding: 2rem;
+        background: #f8fafc;
+        border-radius: 20px;
+        border: 1px solid #e2e8f0;
+    }
+
+    /* Ocultamos las flechas gigantes de Tailwind y el texto en inglés original */
+    .custom-pagination-section nav svg { display: none !important; }
+    .custom-pagination-section nav > div:first-child { display: none !important; }
+
+    .pagination-info-text {
+        font-size: 0.9rem;
+        color: #64748b;
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+        display: block;
+    }
+
+    .pagination-info-text strong {
+        color: var(--brand-navy); 
+        font-weight: 800;
+        margin-left: 5px;  /* Espacio extra a la izquierda del número */
+        margin-right: 5px; /* Espacio extra a la derecha del número */
+    }
+
+    .pagination-nav-container {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    /* Estilo de los botones (Números, Anterior, Siguiente) */
+    .custom-pagination-section a, 
+    .custom-pagination-section span {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 40px;
+        height: 40px;
+        padding: 0 12px;
+        border-radius: 12px;
+        background: white;
+        border: 1px solid #e2e8f0;
+        color: var(--brand-navy);
+        font-weight: 700;
+        font-size: 0.85rem;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .custom-pagination-section a:hover {
+        background: var(--brand-navy);
+        color: white;
+        border-color: var(--brand-navy);
+        transform: translateY(-2px);
+    }
+
+    /* Página Activa */
+    .custom-pagination-section .active-page {
+        background: var(--brand-navy) !important;
+        color: white !important;
+        border-color: var(--brand-navy) !important;
+        box-shadow: 0 4px 10px rgba(15, 23, 42, 0.2);
+    }
+
+    /* Botones deshabilitados */
+    .custom-pagination-section .disabled-btn {
+        opacity: 0.5;
+        cursor: not-allowed;
+        background: #f1f5f9;
+    }
 </style>
 
 <div class="container py-5 animate-page">
@@ -293,10 +367,7 @@
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td>
-                                                <span class="fw-bold text-dark">{{ $reserva->nombre_cliente }}</span>
-                                            </td>
-                                            {{-- IDA --}}
+                                            <td><span class="fw-bold text-dark">{{ $reserva->nombre_cliente }}</span></td>
                                             <td>
                                                 @if($reserva->fecha_entrada)
                                                     <div class="d-flex align-items-center text-nowrap">
@@ -307,7 +378,6 @@
                                                     <span class="text-muted opacity-50">—</span>
                                                 @endif
                                             </td>
-                                            {{-- VUELTA (Usando fecha_vuelo_salida) --}}
                                             <td>
                                                 @if($reserva->fecha_vuelo_salida)
                                                     <div class="d-flex align-items-center text-nowrap">
@@ -351,30 +421,12 @@
                         {{-- VISTA MÓVIL --}}
                         <div class="d-md-none">
                             @foreach ($reservas as $reserva)
-                                @php
-                                    $statusClass = match($reserva->estado) {
-                                        'confirmada' => 'status-confirmada',
-                                        'cancelada' => 'status-cancelada',
-                                        default => 'status-pendiente',
-                                    };
-                                @endphp
                                 <div class="mobile-reserva-card shadow-sm">
                                     <div class="d-flex justify-content-between mb-3">
                                         <span class="localizador-badge">{{ $reserva->localizador }}</span>
                                         <span class="status-pill {{ $statusClass }}">{{ $reserva->estado }}</span>
                                     </div>
                                     <h5 class="fw-bold mb-3">{{ $reserva->nombre_cliente }}</h5>
-                                    <div class="mb-4">
-                                        <p class="mb-2 small"><i class="fas fa-hotel me-2 text-muted"></i>{{ $reserva->hotel->nombre_hotel ?? 'N/A' }}</p>
-                                        
-                                        @if($reserva->fecha_entrada)
-                                            <p class="mb-1 small"><i class="far fa-calendar-alt me-2 text-primary"></i>Ida: {{ \Carbon\Carbon::parse($reserva->fecha_entrada)->format('d/m/Y') }}</p>
-                                        @endif
-                                        
-                                        @if($reserva->fecha_vuelo_salida)
-                                            <p class="mb-0 small"><i class="fas fa-undo me-2 text-info"></i>Vuelta: {{ \Carbon\Carbon::parse($reserva->fecha_vuelo_salida)->format('d/m/Y') }}</p>
-                                        @endif
-                                    </div>
                                     <a href="{{ route('reservas.show', $reserva->id_reserva) }}" class="btn w-100 fw-bold" style="background: var(--brand-navy); color: white; border-radius: 12px; padding: 0.8rem;">
                                         VER DETALLES
                                     </a>
@@ -382,22 +434,40 @@
                             @endforeach
                         </div>
 
-                        <div class="d-flex justify-content-center mt-5">
-                            {{ $reservas->links() }}
+                        <div class="custom-pagination-section text-center shadow-sm">
+                            <span class="pagination-info-text">
+                                Mostrando registros del <strong>{{ $reservas->firstItem() }}</strong> al <strong>{{ $reservas->lastItem() }}</strong> de un total de <strong>{{ $reservas->total() }}</strong>
+                            </span>
+                            
+                            <div class="pagination-nav-container">
+                                {{-- Botón Anterior --}}
+                                @if ($reservas->onFirstPage())
+                                    <span class="disabled-btn">Anterior</span>
+                                @else
+                                    <a href="{{ $reservas->previousPageUrl() }}">Anterior</a>
+                                @endif
+
+                                {{-- Números de Página --}}
+                                @foreach ($reservas->getUrlRange(1, $reservas->lastPage()) as $page => $url)
+                                    @if ($page == $reservas->currentPage())
+                                        <span class="active-page">{{ $page }}</span>
+                                    @else
+                                        <a href="{{ $url }}">{{ $page }}</a>
+                                    @endif
+                                @endforeach
+
+                                {{-- Botón Siguiente --}}
+                                @if ($reservas->hasMorePages())
+                                    <a href="{{ $reservas->nextPageUrl() }}">Siguiente</a>
+                                @else
+                                    <span class="disabled-btn">Siguiente</span>
+                                @endif
+                            </div>
                         </div>
 
                     @else
                         <div class="text-center py-5">
-                            <div class="icon-circle bg-light d-inline-flex align-items-center justify-content-center mb-4" style="width: 120px; height: 120px; border-radius: 50%;">
-                                <i class="fas fa-clipboard-list fa-3x text-muted opacity-20"></i>
-                            </div>
                             <h4 class="fw-bold">No hay reservas activas</h4>
-                            <p class="text-muted mb-4">Parece que no hay registros que coincidan con tu búsqueda.</p>
-                            @if (session('user_type') !== 'hotel')
-                                <a href="{{ route('reservas.create') }}" class="btn btn-action-top bg-dark text-white">
-                                    CREAR MI PRIMERA RESERVA
-                                </a>
-                            @endif
                         </div>
                     @endif
                 </div>

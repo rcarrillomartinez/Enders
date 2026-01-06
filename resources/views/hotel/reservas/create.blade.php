@@ -147,15 +147,15 @@
                     <div class="row g-4">
                         <div class="col-md-6">
                             <label class="fw-bold small mb-2 d-block">Nombre</label>
-                            <input type="text" name="nombre_cliente" class="input-premium" placeholder="Ej: Juan" required>
+                            <input type="text" name="nombre_cliente" class="input-premium" placeholder="Ej: Juan" required value="{{ old('nombre_cliente') }}">
                         </div>
                         <div class="col-md-6">
                             <label class="fw-bold small mb-2 d-block">Primer Apellido</label>
-                            <input type="text" name="apellido1_cliente" class="input-premium" placeholder="Ej: Pérez" required>
+                            <input type="text" name="apellido1_cliente" class="input-premium" placeholder="Ej: Pérez" required value="{{ old('apellido1_cliente') }}">
                         </div>
                         <div class="col-md-12">
                             <label class="fw-bold small mb-2 d-block">Email de Contacto</label>
-                            <input type="email" name="email_cliente" class="input-premium" placeholder="cliente@correo.com" required>
+                            <input type="email" name="email_cliente" class="input-premium" placeholder="cliente@correo.com" required value="{{ old('email_cliente') }}">
                         </div>
                     </div>
 
@@ -169,13 +169,15 @@
                             <select class="form-select input-premium" id="id_tipo_reserva" name="id_tipo_reserva" required>
                                 <option value="" disabled selected>Seleccione...</option>
                                 @foreach (\App\Models\TipoReserva::all() as $tipo)
-                                    <option value="{{ $tipo->id_tipo_reserva }}">{{ $tipo->nombre }}</option>
+                                    <option value="{{ $tipo->id_tipo_reserva }}" {{ old('id_tipo_reserva') == $tipo->id_tipo_reserva ? 'selected' : '' }}>
+                                        {{ $tipo->nombre }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-4">
                             <label class="fw-bold small mb-2 d-block">Nº Pasajeros</label>
-                            <input type="number" class="input-premium" id="num_viajeros" name="num_viajeros" min="1" value="1" required>
+                            <input type="number" class="input-premium" id="num_viajeros" name="num_viajeros" min="1" value="{{ old('num_viajeros', 1) }}" required>
                         </div>
                     </div>
 
@@ -187,15 +189,15 @@
                         <div class="row g-3">
                             <div class="col-md-4">
                                 <label class="small fw-bold text-muted">Fecha</label>
-                                <input type="date" name="fecha_entrada" class="input-premium">
+                                <input type="date" name="fecha_entrada" class="input-premium" value="{{ old('fecha_entrada') }}">
                             </div>
                             <div class="col-md-4">
                                 <label class="small fw-bold text-muted">Hora Estimada</label>
-                                <input type="time" name="hora_entrada" class="input-premium">
+                                <input type="time" name="hora_entrada" class="input-premium" value="{{ old('hora_entrada') }}">
                             </div>
                             <div class="col-md-4">
                                 <label class="small fw-bold text-muted">Nº Vuelo</label>
-                                <input type="text" name="numero_vuelo_entrada" class="input-premium" placeholder="Ex: IB3244">
+                                <input type="text" name="numero_vuelo_entrada" class="input-premium" placeholder="Ex: IB3244" value="{{ old('numero_vuelo_entrada') }}">
                             </div>
                         </div>
                     </div>
@@ -208,15 +210,15 @@
                         <div class="row g-3">
                             <div class="col-md-4">
                                 <label class="small fw-bold text-muted">Fecha Regreso</label>
-                                <input type="date" name="fecha_vuelo_salida" class="input-premium">
+                                <input type="date" name="fecha_vuelo_salida" class="input-premium" value="{{ old('fecha_vuelo_salida') }}">
                             </div>
                             <div class="col-md-4">
                                 <label class="small fw-bold text-muted">Hora de Recogida</label>
-                                <input type="time" name="hora_partida" class="input-premium">
+                                <input type="time" name="hora_partida" class="input-premium" value="{{ old('hora_partida') }}">
                             </div>
                             <div class="col-md-4">
                                 <label class="small fw-bold text-muted">Vuelo Regreso</label>
-                                <input type="text" name="numero_vuelo_salida" class="input-premium" placeholder="Ex: IB3245">
+                                <input type="text" name="numero_vuelo_salida" class="input-premium" placeholder="Ex: IB3245" value="{{ old('numero_vuelo_salida') }}">
                             </div>
                         </div>
                     </div>
@@ -230,7 +232,7 @@
                         <select class="form-select input-premium" id="id_vehiculo" name="id_vehiculo" required>
                             <option value="">-- Seleccione un vehículo disponible --</option>
                             @foreach ($vehiculos as $vehiculo)
-                                <option value="{{ $vehiculo->id_vehiculo }}" data-capacidad="{{ $vehiculo->capacidad }}">
+                                <option value="{{ $vehiculo->id_vehiculo }}" data-capacidad="{{ $vehiculo->capacidad }}" {{ old('id_vehiculo') == $vehiculo->id_vehiculo ? 'selected' : '' }}>
                                     {{ $vehiculo->descripcion }} (Capacidad: {{ $vehiculo->capacidad }} pax)
                                 </option>
                             @endforeach
@@ -242,8 +244,10 @@
 
                     <div class="mb-4">
                         <label class="fw-bold small mb-2 d-block">Observaciones Especiales</label>
-                        <textarea name="observaciones" class="input-premium" rows="2" placeholder="Silla de bebé, maletas extra, etc."></textarea>
+                        <textarea name="observaciones" class="input-premium" rows="2" placeholder="Silla de bebé, maletas extra, etc.">{{ old('observaciones') }}</textarea>
                     </div>
+
+                    <input type="hidden" name="id_hotel" value="{{ Auth::guard('hotel')->user()->id_hotel }}">
 
                     <button type="submit" class="btn-submit-premium" id="btnConfirmar">
                         CONFIRMAR Y FINALIZAR RESERVA
@@ -271,6 +275,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let disponibles = 0;
 
         // Mostrar/Ocultar bloques según tipo de reserva
+        // 1 = Solo Ida, 2 = Solo Vuelta, 3 = Ida y Vuelta
         bIda.style.display = (val == "1" || val == "3") ? "block" : "none";
         bVuelta.style.display = (val == "2" || val == "3") ? "block" : "none";
 
@@ -292,8 +297,11 @@ document.addEventListener('DOMContentLoaded', function() {
         aviso.style.display = (disponibles === 0 && pax > 0) ? "block" : "none";
     }
 
-    // Evitar doble envío
-    form.addEventListener('submit', function() {
+    // Evitar doble envío y mostrar estado de carga
+    form.addEventListener('submit', function(e) {
+        if (!form.checkValidity()) {
+            return;
+        }
         btnConfirmar.disabled = true;
         btnConfirmar.innerHTML = '<i class="fas fa-circle-notch fa-spin me-2"></i> PROCESANDO...';
     });
@@ -301,6 +309,7 @@ document.addEventListener('DOMContentLoaded', function() {
     selectTipo.addEventListener('change', refresh);
     inputPax.addEventListener('input', refresh);
     
+    // Ejecutar al cargar por si hay valores previos (old input)
     refresh(); 
 });
 </script>

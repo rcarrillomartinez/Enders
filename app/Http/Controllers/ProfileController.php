@@ -25,8 +25,15 @@ class ProfileController extends Controller
         };
 
         // Definimos los campos para el cálculo de progreso
-        // Incluimos 'foto' para que también sume puntos
-        $campos = ['email', 'nombre', 'apellido1', 'ciudad', 'password', 'foto'];
+        // AJUSTE: Campos dinámicos según el tipo de usuario para evitar errores
+        if ($userType === 'hotel') {
+            // Campos reales en la tabla tranfer_hotel
+            $campos = ['usuario', 'nombre_hotel', 'password', 'foto'];
+        } else {
+            // Campos para viajero y admin
+            $campos = ['email', 'nombre', 'apellido1', 'ciudad', 'password', 'foto'];
+        }
+        
         $llenos = 0;
 
         if ($profileData) {
@@ -65,13 +72,22 @@ class ProfileController extends Controller
         if (!$user) return back()->withErrors(['Usuario no encontrado']);
 
         // Validamos
-        $request->validate([
+        $rules = [
             'foto' => 'nullable|image|max:2048',
-            'email' => 'required|string', // Este campo viene del input del form
-            'new_password' => 'nullable|min:8|confirmed',
-        ]);
+            'password' => 'nullable|min:8|confirmed',
+        ];
 
-        // 1. Manejo de la FOTO
+        if ($userType === 'hotel') {
+            $rules['usuario'] = 'required|string';
+            $rules['nombre_hotel'] = 'required|string';
+        } else {
+            $rules['email'] = 'required|string'; 
+            $rules['nombre'] = 'required|string';
+        }
+
+        $request->validate($rules);
+
+        // Manejo de la fotografia
         if ($request->hasFile('foto')) {
             if ($user->foto) {
                 \Storage::disk('public')->delete($user->foto);
@@ -79,10 +95,11 @@ class ProfileController extends Controller
             $user->foto = $request->file('foto')->store('avatars', 'public');
         }
 
-        // 2. Manejo de Datos según tipo (Mapeo de columnas real)
+        // Manejo de Datos según tipo (Mapeo de columnas real)
         if ($userType === 'hotel') {
-            $user->usuario = $request->email; // En hoteles la columna se llama 'usuario'
+            $user->usuario = $request->usuario; // En hoteles la columna se llama 'usuario'
             $user->nombre_hotel = $request->nombre_hotel;
+            // id_zona y comision se mantienen con sus valores actuales de la DB
         } else {
             $user->email = $request->email; // En admin/viajero se llama 'email'
             $user->nombre = $request->nombre;
@@ -92,9 +109,9 @@ class ProfileController extends Controller
             }
         }
 
-        // 3. Contraseña
-        if ($request->filled('new_password')) {
-            $user->password = \Hash::make($request->new_password);
+        // Contraseña
+        if ($request->filled('password')) {
+            $user->password = \Hash::make($request->password);
         }
 
         $user->save();

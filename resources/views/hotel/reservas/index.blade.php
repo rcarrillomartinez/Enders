@@ -146,12 +146,19 @@
     .type-vuelta { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
     .type-idavuelta { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
 
-    .obs-trigger {
-        cursor: help;
-        color: #94a3b8;
-        transition: color 0.2s;
+    .obs-bubble {
+        background: #f1f5f9;
+        padding: 6px 12px;
+        border-radius: 10px;
+        font-size: 0.75rem;
+        color: #475569;
+        display: inline-block;
+        max-width: 150px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        cursor: pointer;
     }
-    .obs-trigger:hover { color: #3b82f6; }
 
     .sweep-animate {
         animation: sweepIn 0.8s cubic-bezier(0.2, 1, 0.3, 1) forwards;
@@ -200,11 +207,11 @@
 
                                     <td>
                                         @php
-                                            $tipo = strtolower($r->tipoReserva->nombre ?? '');
+                                            $tipoId = (int)$r->id_tipo_reserva;
                                         @endphp
-                                        @if(str_contains($tipo, 'vuelta') && str_contains($tipo, 'ida'))
+                                        @if($tipoId === 3)
                                             <span class="type-pill type-idavuelta"><i class="fas fa-exchange-alt"></i> IDA Y VUELTA</span>
-                                        @elseif(str_contains($tipo, 'vuelta'))
+                                        @elseif($tipoId === 2)
                                             <span class="type-pill type-vuelta"><i class="fas fa-arrow-left"></i> SOLO VUELTA</span>
                                         @else
                                             <span class="type-pill type-ida"><i class="fas fa-arrow-right"></i> SOLO IDA</span>
@@ -220,21 +227,32 @@
 
                                     <td>
                                         <div class="d-flex flex-column">
+                                            @php
+                                                $fecha = $r->fecha_entrada ?? $r->fecha_vuelo_salida;
+                                                $hora = $r->hora_entrada ?? $r->hora_partida;
+                                                $vuelo = $r->numero_vuelo_entrada ?? $r->numero_vuelo_salida;
+                                                $esVuelta = (!$r->fecha_entrada && $r->fecha_vuelo_salida);
+                                            @endphp
                                             <span class="fw-bold text-nowrap">
                                                 <i class="far fa-calendar-alt me-1 text-muted"></i> 
-                                                {{ $r->fecha_entrada ? \Carbon\Carbon::parse($r->fecha_entrada)->format('d/m/Y') : '--/--/----' }}
+                                                {{ $fecha ? $fecha->format('d/m/Y') : '--/--/----' }}
                                             </span>
                                             <div class="d-flex align-items-center gap-2 mt-1">
                                                 <small class="badge bg-light text-dark border">
                                                     <i class="far fa-clock me-1 text-muted"></i> 
-                                                    {{ $r->hora_entrada ? \Carbon\Carbon::parse($r->hora_entrada)->format('H:i') : '--:--' }}h
+                                                    {{ $hora ? \Carbon\Carbon::parse($hora)->format('H:i') : '--:--' }}h
                                                 </small>
-                                                @if($r->num_vuelo_entrada)
+                                                @if($vuelo)
                                                     <small class="text-primary fw-bold" style="font-size: 0.7rem;">
-                                                        <i class="fas fa-plane-arrival me-1"></i> {{ $r->num_vuelo_entrada }}
+                                                        <i class="fas {{ $esVuelta ? 'fa-plane-departure' : 'fa-plane-arrival' }} me-1"></i> {{ $vuelo }}
                                                     </small>
                                                 @endif
                                             </div>
+                                            @if($tipoId === 3 && $r->fecha_entrada && $r->fecha_vuelo_salida)
+                                                <small class="text-muted mt-1" style="font-size: 0.65rem;">
+                                                    <i class="fas fa-retweet me-1"></i> Regreso: {{ $r->fecha_vuelo_salida->format('d/m/Y') }}
+                                                </small>
+                                            @endif
                                         </div>
                                     </td>
 
@@ -268,11 +286,11 @@
 
                                     <td class="text-center">
                                         @if($r->observaciones)
-                                            <span class="obs-trigger" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ $r->observaciones }}">
-                                                <i class="fas fa-comment-dots fa-lg"></i>
-                                            </span>
+                                            <div class="obs-bubble" data-bs-toggle="tooltip" title="{{ $r->observaciones }}">
+                                                <i class="fas fa-sticky-note me-1 text-primary"></i> {{ $r->observaciones }}
+                                            </div>
                                         @else
-                                            <span class="text-light">-</span>
+                                            <span class="text-muted" style="opacity: 0.3;">-</span>
                                         @endif
                                     </td>
 
@@ -297,5 +315,4 @@
         })
     });
 </script>
-
 @endsection
